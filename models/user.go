@@ -15,7 +15,7 @@ type User struct {
 
 type Users []*User
 
-func AllUsers() ([]*User, error) {
+func (u *User) All(db *sql.DB) ([]*User, error) {
 	log.Println(">>> start AllUsers() >> db = ", db)
 	rows, err := db.Query("SELECT * FROM user")
 	if err != nil {
@@ -25,7 +25,7 @@ func AllUsers() ([]*User, error) {
 	defer rows.Close()
 	var users Users
 	for rows.Next() {
-		u := new(User)
+		//u := new(User)
 		err := rows.Scan(&u.ID, &u.Name, &u.Password, &u.PeopleID)
 		if err != nil {
 			log.Println(">>> rows.Scan() Error= ", err)
@@ -42,6 +42,11 @@ func AllUsers() ([]*User, error) {
 	rows.Close()
 	log.Println("return users", users)
 	return users, nil
+}
+
+func (u *User) Add(db *sql.DB) (*User, error){
+	err := error()
+	return u, err
 }
 
 func (u *User) SetPass(p string) error {

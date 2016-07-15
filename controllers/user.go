@@ -37,8 +37,8 @@ func (e *Env) UserIndex(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(500), 500)
 		return
 	}
-	o, _ := json.Marshal(users)
-	fmt.Fprintf(w, string(o))
+	output, _ := json.Marshal(users)
+	fmt.Fprintf(w, string(output))
 }
 
 func (e *Env) UserAdd(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +50,7 @@ func (e *Env) UserAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// POST JSON must in this form:
-	// {id: 999, name: "xxx", password: "xxx', person_id: 999}
+	// {"name": "xxx", "password": "xxx'}
 
 	u := models.User{}
 	// retrieve JSON from body request to decoder and decode it to memory address of User{}
@@ -68,6 +68,8 @@ func (e *Env) UserAdd(w http.ResponseWriter, r *http.Request) {
 		log.Println("Success u.SetPass()")
 	}
 	newUser, err := u.New(e.DB)
+	output, _ := json.Marshal(newUser)
+	fmt.Fprintf(w, string(output))
 	fmt.Println("Result User inserted to DB: ", newUser)
 }
 

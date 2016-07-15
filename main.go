@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	DB_HOST = "tcp(localhost:3306)"
+	DB_HOST = "tcp(nava.work:3306)"
 	DB_NAME = "nava"
 	DB_USER = /*"root"*/ "root"
 	DB_PASS = /*""*/ "mypass"
@@ -27,7 +27,7 @@ func main() {
 	c := &controllers.Env{DB: db}
 
 	defer db.Close()
-	log.Println("start InitDB()")
+	log.Println("start NewDB()")
 
 	r := mux.NewRouter()
 	http.HandleFunc("/api", controllers.MainIndex)

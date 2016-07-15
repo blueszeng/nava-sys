@@ -41,7 +41,7 @@ func (e *Env) UserIndex(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(output))
 }
 
-func (e *Env) UserAdd(w http.ResponseWriter, r *http.Request) {
+func (e *Env) UserNew(w http.ResponseWriter, r *http.Request) {
 	log.Println("call POST UserAdd()")
 	log.Println("Request Body:", r.Body)
 
@@ -67,17 +67,18 @@ func (e *Env) UserAdd(w http.ResponseWriter, r *http.Request) {
 	} else {
 		log.Println("Success u.SetPass()")
 	}
+	// call u.New() method from models/user
 	newUser, err := u.New(e.DB)
 	output, _ := json.Marshal(newUser)
 	fmt.Fprintf(w, string(output))
 	fmt.Println("Result User inserted to DB: ", newUser)
 }
 
-// Todo: write Mehtod u.Search by match u.id or u.Name.
+// Todo: write Method u.Search by match u.id or u.Name.
 // Todo: write Method u.UserShow to query 1 row of user match u.id
 
-func (e Env) UserEdit(w http.ResponseWriter, r *http.Request) {
-	log.Println("call POST UserEdit()")
+func (e Env) UserUpdate(w http.ResponseWriter, r *http.Request) {
+	log.Println("call PUT UserUpdate()")
 	log.Println("Request Body:", r.Body)
 
 	if r.Method != "PUT" {
@@ -98,7 +99,7 @@ func (e Env) UserEdit(w http.ResponseWriter, r *http.Request) {
 	} else {
 		log.Println("Success u.SetPass()")
 	}
-	editUser, err := u.New(e.DB)
+	editUser, err := u.Update(e.DB)
 	fmt.Println("Result User inserted to DB: ", editUser)
 }
 

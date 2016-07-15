@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"errors"
 )
 
 type User struct {
@@ -80,9 +81,40 @@ func (u *User) New(db *sql.DB) (*User, error) {
 func (u *User) Update(db *sql.DB) (*User, error) {
 	log.Println(">>start u.Update() method")
 
-	// TODO: Check if no match user.Name // return error and ask to create new user.
+	// TODO: Check if no exist user.Name // return error and ask to create new user.
+	existUser := User{}
+	err := db.QueryRow("SELECT name FROM user WHERE name = ?", u.Name).Scan(&existUser.Name)
+	if err != nil {
+		log.Panic("Error db.QueryRow in user.Update()", err)
+	}
+	if u.Name == existUser.Name {
+		// Ok match exist user name...Run command to update data
+		var res sql.Result
+		var err error
+		// TODO: Check if u.password == nil: then user don't need to change password
+		// db.Exec to update record
+		if u.Password == "" {
+			res, err = db.Exec("UPDATE user SET name= ? WHERE id = ?", u.Name, existUser.ID)
+		} else {
+			res, err = db.Exec("UPDATE user SET name= ?, secret= ? WHERE id =? ", u.Name, u.Secret, existUser.ID)
+		}
+		if err != nil {
+			log.Panic("Error UPDATE user...", err)
+			return nil, err
+		}
+		// db.QueryRow to check if correct update record
+		countrow, _ := res.RowsAffected()
+		log.Println("Number of row updated: ", countrow)
+		n := User{}
+		err = db.QueryRow("SELECT name, secret FROM user WHERE id =?", existUser.ID).Scan(&n.Name, &n.Secret)
+		if err != nil {
+			log.Println("Error when SELECT updated row??? >>>", err)
+		}
+		// return new query update record
+		return &n, nil
+	}
+	err = errors.New("No match exist name: Do you want to create NEW User?")
 
-	// TODO: Check if hash password not match maybe user need to change password
 
 	return u, nil
 }

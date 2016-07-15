@@ -41,9 +41,9 @@ func main() {
 
 	r.HandleFunc("/api/v1/users", c.UserIndex).Methods("GET")
 	log.Println("start HandleFunc('/api/v1/users') GET")
-	r.HandleFunc("/api/v1/users", c.UserAdd).Methods("POST")
+	r.HandleFunc("/api/v1/users", c.UserNew).Methods("POST")
 	log.Println("start HandleFunc('/api/v1/users') POST")
-	r.HandleFunc("/api/v1/users", c.UserEdit).Methods("PUT")
+	r.HandleFunc("/api/v1/users", c.UserUpdate).Methods("PUT")
 	log.Println("start HandleFunc('/api/v1/users') PUT")
 	http.Handle("/", r)
 	http.ListenAndServe(":8080", nil)

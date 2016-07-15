@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"database/sql"
 	"github.com/mrtomyum/nava-api3/models"
+	"github.com/gorilla/mux"
+	"strconv"
 )
 
 type Env struct{
@@ -23,7 +25,7 @@ func TestIndex(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%v", "Test")
 }
 
-func (e *Env) UserIndex(w http.ResponseWriter, r *http.Request) {
+func (e *Env) UserAll(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserIndex()")
 
 	if r.Method != "GET" {
@@ -74,8 +76,27 @@ func (e *Env) UserNew(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Result User inserted to DB: ", newUser)
 }
 
-// Todo: write Method u.Search by match u.id or u.Name.
-// Todo: write Method u.UserShow to query 1 row of user match u.id
+// Todo: write Method UserSearch by match u.id or u.Name.
+// Todo: write Method UserShow to query 1 row of user match u.id
+func (e Env) UserShow(w http.ResponseWriter, r *http.Request) {
+	log.Println("call GET UserShow()")
+
+	if r.Method != "GET" {
+		http.Error(w, http.StatusText(500), 500)
+		return
+	}
+	v := mux.Vars(r)
+	userID := v["id"]
+	u := new(models.User)
+	u.ID, _ = strconv.ParseInt(userID, 10, 64)
+	n, err := u.Show(e.DB)
+	if err != nil {
+		log.Fatal("Error u.Show in c.user.go.Show:", err)
+	}
+	output, _ := json.Marshal(n)
+	fmt.Fprintf(w, string(output))
+}
+// Todo: write Method UserDel to mark deleted by field del_date
 
 func (e Env) UserUpdate(w http.ResponseWriter, r *http.Request) {
 	log.Println("call PUT UserUpdate()")
@@ -85,7 +106,11 @@ func (e Env) UserUpdate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(500), 500)
 		return
 	}
-	u := models.User{}
+	v := mux.Vars(r)
+	userID := v["id"]
+	u := new(models.User)
+	u.ID, _ = strconv.ParseInt(userID, 10, 64)
+
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&u)
 	if err != nil {

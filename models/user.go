@@ -8,9 +8,9 @@ import (
 )
 
 type User struct {
-	ID       int64  `json:id`
-	Name     string `json:name`
-	Password string `json:password` // just for receive JSON plain-text password but not store in DB
+	ID       int64  `json:"id"`
+	Name     string `json:"name"`
+	Password string `json:"password"` // just for receive JSON plain-text password but not store in DB
 	Secret   []byte
 	//PeopleID sql.NullInt64 `json:people_id` // TODO: ยังไม่รู้จะรับค่า JSON decode มาใส่ sql.NullXYZ ยังไง เ
 	// TODO: เนื่องจาก sql.NullXYZ เป็น struct {???: ???, Valid: boolean}
@@ -20,17 +20,15 @@ type Users []*User
 
 func (u *User) All(db *sql.DB) ([]*User, error) {
 	log.Println(">>> start AllUsers() >> db = ", db)
+
 	rows, err := db.Query("SELECT * FROM user")
 	if err != nil {
 		log.Println(">>> db.Query Error= ", err)
 		return nil, err
 	}
 	defer rows.Close()
-	log.Println(rows)
 
-	//var users Users
-	users := make([]*User, 0)
-
+	var users Users
 	for rows.Next() {
 		// we not save plain text password in database just secret
 		var i = new(User)
@@ -83,7 +81,7 @@ func (u *User) New(db *sql.DB) (*User, error) {
 
 // Edit/UpdateUser by id
 func (u *User) Update(db *sql.DB) (*User, error) {
-	log.Println(">>start u.Update() method")
+	log.Println(">>start models.user.Update() method")
 
 	// TODO: Check if no exist user.Name // return error and ask to create new user.
 	existUser := User{}
@@ -91,6 +89,7 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 	if err != nil {
 		log.Panic("Error db.QueryRow in user.Update()", err)
 	}
+	log.Println("existUser: ", existUser)
 	if u.Name == existUser.Name {
 		// Ok match exist user name...Run command to update data
 		var res sql.Result
@@ -118,6 +117,15 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 	err = errors.New("No match exist name: Do you want to create NEW User?")
 
 
+	return u, nil
+}
+
+func (u *User) Show(db *sql.DB) (*User, error) {
+	err := db.QueryRow("SELECT * FROM user WHERE id = ?", u.ID).Scan(&u.ID, &u.Name, &u.Secret)
+	if err != nil {
+		log.Fatal("Error SELECT * in user.Show:", err)
+		return nil, err
+	}
 	return u, nil
 }
 

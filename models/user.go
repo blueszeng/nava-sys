@@ -63,8 +63,8 @@ func (u *User) New(db *sql.DB) (*User, error) {
 	log.Printf("Last insert ID = %d, Number of rows = %d", lastID, num)
 
 	// test query data
-	i := new(User)
-	err = db.QueryRow("SELECT ID, name FROM user WHERE id = ?", lastID).Scan(&i.ID, &i.Name)
+	n := new(User)
+	err = db.QueryRow("SELECT id, name, secret FROM user WHERE id = ?", lastID).Scan(&n.ID, &n.Name, &n.Secret)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Fatal("Error not found: ", err)
@@ -72,8 +72,8 @@ func (u *User) New(db *sql.DB) (*User, error) {
 			log.Fatal(err)
 		}
 	}
-	log.Println("Success insert record: ", i)
-	return i, nil
+	log.Println("Success insert record: ", n)
+	return n, nil
 }
 
 // Edit/UpdateUser

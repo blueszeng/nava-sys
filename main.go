@@ -29,22 +29,20 @@ func main() {
 	defer db.Close()
 	log.Println("start NewDB()")
 
-	r := mux.NewRouter()
 	http.HandleFunc("/api", controllers.MainIndex)
-	log.Println("start HandleFunc('/api')")
+	//log.Println("start HandleFunc('/api')")
 	http.HandleFunc("/api/v1/test", controllers.TestIndex)
-	log.Println("start HandleFunc('/api/v1/test')")
+	//log.Println("start HandleFunc('/api/v1/test')")
 
-
-	//http.HandleFunc("/api/v1/users", c.UserIndex)
-	//log.Println("start HandleFunc('/api/v1/users')")
-
-	r.HandleFunc("/api/v1/users", c.UserIndex).Methods("GET")
-	log.Println("start HandleFunc('/api/v1/users') GET")
-	r.HandleFunc("/api/v1/users", c.UserNew).Methods("POST")
-	log.Println("start HandleFunc('/api/v1/users') POST")
-	r.HandleFunc("/api/v1/users", c.UserUpdate).Methods("PUT")
-	log.Println("start HandleFunc('/api/v1/users') PUT")
+	r := mux.NewRouter()
+	r.HandleFunc("/api/v1/user", c.UserIndex).Methods("GET")
+	//log.Println("start HandleFunc('/api/v1/users') GET")
+	r.HandleFunc("/api/v1/user", c.UserNew).Methods("POST")
+	//log.Println("start HandleFunc('/api/v1/users') POST")
+	//r.HandleFunc("/api/v1/user/{id:[0-9]+}", c.UserShow).Methods("GET")
+	//log.Println("start HandleFunc('/api/v1/users/:id') GET")
+	r.HandleFunc("/api/v1/user/{id:[0-9]+}", c.UserUpdate).Methods("PUT")
+	//log.Println("start HandleFunc('/api/v1/users/:id') PUT")
 	http.Handle("/", r)
 	http.ListenAndServe(":8080", nil)
 }

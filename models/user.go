@@ -42,7 +42,6 @@ func (u *User) All(db *sql.DB) ([]*User, error) {
 		rows.Close()
 		return nil, err
 	}
-	rows.Close()
 	log.Println("return users", users)
 	return users, nil
 }
@@ -77,7 +76,7 @@ func (u *User) New(db *sql.DB) (*User, error) {
 	return n, nil
 }
 
-// Edit/UpdateUser
+// Edit/UpdateUser by id
 func (u *User) Update(db *sql.DB) (*User, error) {
 	log.Println(">>start u.Update() method")
 
@@ -90,9 +89,7 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 	if u.Name == existUser.Name {
 		// Ok match exist user name...Run command to update data
 		var res sql.Result
-		var err error
-		// TODO: Check if u.password == nil: then user don't need to change password
-		// db.Exec to update record
+		// Check if u.password is BLANK: So, user don't need to change password
 		if u.Password == "" {
 			res, err = db.Exec("UPDATE user SET name= ? WHERE id = ?", u.Name, existUser.ID)
 		} else {
@@ -103,8 +100,8 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 			return nil, err
 		}
 		// db.QueryRow to check if correct update record
-		countrow, _ := res.RowsAffected()
-		log.Println("Number of row updated: ", countrow)
+		countRow, _ := res.RowsAffected()
+		log.Println("Number of row updated: ", countRow)
 		n := User{}
 		err = db.QueryRow("SELECT name, secret FROM user WHERE id =?", existUser.ID).Scan(&n.Name, &n.Secret)
 		if err != nil {

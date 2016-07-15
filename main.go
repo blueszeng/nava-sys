@@ -39,7 +39,7 @@ func main() {
 	//log.Println("start HandleFunc('/api/v1/users') GET")
 	r.HandleFunc("/api/v1/user", c.UserNew).Methods("POST")
 	//log.Println("start HandleFunc('/api/v1/users') POST")
-	//r.HandleFunc("/api/v1/user/{id:[0-9]+}", c.UserShow).Methods("GET")
+//	r.HandleFunc("/api/v1/user/{id:[0-9]+}", c.UserShow).Methods("GET")
 	//log.Println("start HandleFunc('/api/v1/users/:id') GET")
 	r.HandleFunc("/api/v1/user/{id:[0-9]+}", c.UserUpdate).Methods("PUT")
 	//log.Println("start HandleFunc('/api/v1/users/:id') PUT")

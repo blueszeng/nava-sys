@@ -26,16 +26,21 @@ func (u *User) All(db *sql.DB) ([]*User, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var users Users
+	log.Println(rows)
+
+	//var users Users
+	users := make([]*User, 0)
+
 	for rows.Next() {
 		// we not save plain text password in database just secret
-		err := rows.Scan(&u.ID, &u.Name, &u.Secret)
+		var i = new(User)
+		err := rows.Scan(&i.ID, &i.Name, &i.Secret)
 		if err != nil {
 			log.Println(">>> rows.Scan() Error= ", err)
-			rows.Close()
 			return nil, err
 		}
-		users = append(users, u)
+		users = append(users, i)
+		log.Println("users= ",users, "u= ", i)
 	}
 	if err = rows.Err(); err != nil {
 		log.Println(">>> rows.Err()= ", err)

@@ -12,8 +12,8 @@ import (
 const (
 	DB_HOST = "tcp(nava.work:3306)"
 	DB_NAME = "nava"
-	DB_USER = /*"root"*/ "root"
-	DB_PASS = /*""*/ "mypass"
+	DB_USER = "root"
+	DB_PASS = "mypass"
 )
 
 var dsn = DB_USER + ":" + DB_PASS + "@" + DB_HOST + "/" + DB_NAME + "?charset=utf8"
@@ -43,6 +43,7 @@ func main() {
 	log.Println("start HandleFunc('/api/v1/users/:id') GET")
 	r.HandleFunc("/api/v1/user/{id:[0-9]+}", c.UserUpdate).Methods("PUT")
 	log.Println("start HandleFunc('/api/v1/users/:id') PUT")
+	r.HandleFunc("/api/v1/login", c.Login).Methods("POST")
 	http.Handle("/", r)
 	http.ListenAndServe(":8080", nil)
 }

@@ -18,6 +18,16 @@ type User struct {
 
 type Users []*User
 
+
+func (u *User) Show(db *sql.DB) (*User, error) {
+	err := db.QueryRow("SELECT * FROM user WHERE id = ?", u.ID).Scan(&u.ID, &u.Name, &u.Secret)
+	if err != nil {
+		log.Fatal("Error SELECT * in user.Show:", err)
+		return nil, err
+	}
+	return u, nil
+}
+
 func (u *User) All(db *sql.DB) ([]*User, error) {
 	log.Println(">>> start AllUsers() >> db = ", db)
 
@@ -56,9 +66,11 @@ func (u *User) New(db *sql.DB) (*User, error) {
 	// TODO: check if exist same user.Name
 	// TODO: IF user has permission, ask to edit or ...reject and return error
 
-	rs, err := db.Exec("INSERT INTO user VALUE(?, ?, ?)",u.ID, u.Name, u.Secret) // no plain text u.Password save to DB
+	//rs, err := db.Exec("INSERT INTO user VALUE(?, ?, ?)",u.ID, u.Name, u.Secret) // no plain text u.Password save to DB
+	rs, err := db.Exec("INSERT INTO user (name, secret) VALUES(?, ?)",u.Name, u.Secret) // no plain text u.Password save to DB
 	if err != nil {
-		log.Fatal(">>>Error Exec INSERT...User: >>>", err)
+		log.Println(">>>Error cannot exec INSERT User: >>>", err)
+		return nil, err
 	}
 
 	lastID, _ := rs.LastInsertId()
@@ -77,17 +89,6 @@ func (u *User) New(db *sql.DB) (*User, error) {
 	}
 	log.Println("Success insert record: ", n)
 	return n, nil
-}
-
-//TODO: function models.User.Search() here!
-
-func (u *User) Show(db *sql.DB) (*User, error) {
-	err := db.QueryRow("SELECT * FROM user WHERE id = ?", u.ID).Scan(&u.ID, &u.Name, &u.Secret)
-	if err != nil {
-		log.Fatal("Error SELECT * in user.Show:", err)
-		return nil, err
-	}
-	return u, nil
 }
 
 // Edit/UpdateUser by id
@@ -109,6 +110,7 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 	if u.Password == "" {
 		rs, err = db.Exec("UPDATE user SET name= ? WHERE id = ?", u.Name, existUser.ID)
 	} else {
+		u.SetPass()
 		rs, err = db.Exec("UPDATE user SET name= ?, secret= ? WHERE id =? ", u.Name, u.Secret, existUser.ID)
 	}
 	if err != nil {
@@ -140,13 +142,26 @@ func (u *User) SetPass() error {
 		return err
 	}
 	u.Secret = hash
+	log.Println("Got u.Secret: ", u.Secret)
 	return nil
 }
 
-func (u *User) verifyPass(p string) error { // not export call from Add() or Update
+
+func (u *User) VerifyPass(p string) error { // not export call from Add() or Update
 	err := bcrypt.CompareHashAndPassword(u.Secret, []byte(p))
 	if err != nil {
 		return err
 	}
 	return nil
 }
+
+func (u *User) SearchByName(db *sql.DB) error{
+	err := db.QueryRow("SELECT id, name, secret FROM user WHERE name = ?", u.Name).Scan(&u.ID, &u.Name, &u.Secret)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+}
+
+//TODO: function models.User.Search() here!

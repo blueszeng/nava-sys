@@ -56,13 +56,13 @@ func (u *User) New(db *sql.DB) (*User, error) {
 	// TODO: check if exist same user.Name
 	// TODO: IF user has permission, ask to edit or ...reject and return error
 
-	res, err := db.Exec("INSERT INTO user VALUE(?, ?, ?)",u.ID, u.Name, u.Secret) // no plain text u.Password save to DB
+	rs, err := db.Exec("INSERT INTO user VALUE(?, ?, ?)",u.ID, u.Name, u.Secret) // no plain text u.Password save to DB
 	if err != nil {
 		log.Fatal(">>>Error Exec INSERT...User: >>>", err)
 	}
 
-	lastID, _ := res.LastInsertId()
-	num, _ := res.RowsAffected()
+	lastID, _ := rs.LastInsertId()
+	num, _ := rs.RowsAffected()
 	log.Printf("Last insert ID = %d, Number of rows = %d", lastID, num)
 
 	// test query data
@@ -79,46 +79,7 @@ func (u *User) New(db *sql.DB) (*User, error) {
 	return n, nil
 }
 
-// Edit/UpdateUser by id
-func (u *User) Update(db *sql.DB) (*User, error) {
-	log.Println(">>start models.user.Update() method")
-
-	// TODO: Check if no exist user.Name // return error and ask to create new user.
-	existUser := User{}
-	err := db.QueryRow("SELECT name FROM user WHERE name = ?", u.Name).Scan(&existUser.Name)
-	if err != nil {
-		log.Panic("Error db.QueryRow in user.Update()", err)
-	}
-	log.Println("existUser: ", existUser)
-	if u.Name == existUser.Name {
-		// Ok match exist user name...Run command to update data
-		var res sql.Result
-		// Check if u.password is BLANK: So, user don't need to change password
-		if u.Password == "" {
-			res, err = db.Exec("UPDATE user SET name= ? WHERE id = ?", u.Name, existUser.ID)
-		} else {
-			res, err = db.Exec("UPDATE user SET name= ?, secret= ? WHERE id =? ", u.Name, u.Secret, existUser.ID)
-		}
-		if err != nil {
-			log.Panic("Error UPDATE user...", err)
-			return nil, err
-		}
-		// db.QueryRow to check if correct update record
-		countRow, _ := res.RowsAffected()
-		log.Println("Number of row updated: ", countRow)
-		n := User{}
-		err = db.QueryRow("SELECT name, secret FROM user WHERE id =?", existUser.ID).Scan(&n.Name, &n.Secret)
-		if err != nil {
-			log.Println("Error when SELECT updated row??? >>>", err)
-		}
-		// return new query update record
-		return &n, nil
-	}
-	err = errors.New("No match exist name: Do you want to create NEW User?")
-
-
-	return u, nil
-}
+//TODO: function models.User.Search() here!
 
 func (u *User) Show(db *sql.DB) (*User, error) {
 	err := db.QueryRow("SELECT * FROM user WHERE id = ?", u.ID).Scan(&u.ID, &u.Name, &u.Secret)
@@ -129,8 +90,46 @@ func (u *User) Show(db *sql.DB) (*User, error) {
 	return u, nil
 }
 
-// Delete User (Later we will implement my framework just add delete DateX
+// Edit/UpdateUser by id
+func (u *User) Update(db *sql.DB) (*User, error) {
+	log.Println(">>start models.user.Update() method")
+	// TODO: Check if no exist user.Name // return error and ask to create new user.
+	existUser := User{}
+	err := db.QueryRow("SELECT id, name, secret FROM user WHERE id = ?", u.ID).Scan(&existUser.ID, &existUser.Name, &existUser.Secret)
+	if err != nil {
+		log.Panic("Error db.QueryRow in user.Update()", err)
+	}
+	log.Println("existUser: ", existUser)
+	if u.Name != existUser.Name {
+		err = errors.New("No match exist name: Do you want to create NEW User?")
+	}
+	// Ok match exist user name...Run command to update data
+	var rs sql.Result
+	// Check if u.password is BLANK: So, user don't need to change password
+	if u.Password == "" {
+		rs, err = db.Exec("UPDATE user SET name= ? WHERE id = ?", u.Name, existUser.ID)
+	} else {
+		rs, err = db.Exec("UPDATE user SET name= ?, secret= ? WHERE id =? ", u.Name, u.Secret, existUser.ID)
+	}
+	if err != nil {
+		log.Panic("Error UPDATE user...", err)
+		return nil, err
+	}
+	// db.QueryRow to check if correct update record
+	countRow, _ := rs.RowsAffected()
+	log.Println("Number of row updated: ", countRow)
+	n := User{}
+	err = db.QueryRow("SELECT id, name, secret FROM user WHERE id =?", existUser.ID).Scan(&n.ID, &n.Name, &n.Secret)
+	if err != nil {
+		log.Println("Error when SELECT updated row??? >>>", err)
+	}
+	// return new query update record
+	return &n, nil
+}
+
+// TODO: Method models.User.Del to delete User (Later we will implement my framework just add delete DateX
 func (u *User) Delete(db *sql.DB) error {
+	//TODO: Code to DELETE here.
 	return nil
 }
 

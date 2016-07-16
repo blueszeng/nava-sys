@@ -77,7 +77,8 @@ func (e *Env) UserNew(w http.ResponseWriter, r *http.Request) {
 }
 
 // Todo: write Method UserSearch by match u.id or u.Name.
-// Todo: write Method UserShow to query 1 row of user match u.id
+
+// Method UserShow to query 1 row of user match u.id
 func (e Env) UserShow(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserShow()")
 
@@ -96,7 +97,8 @@ func (e Env) UserShow(w http.ResponseWriter, r *http.Request) {
 	output, _ := json.Marshal(n)
 	fmt.Fprintf(w, string(output))
 }
-// Todo: write Method UserDel to mark deleted by field del_date
+
+// Todo: Method UserSearch output JSON user.id for client use id as parameter in UserUpdate
 
 func (e Env) UserUpdate(w http.ResponseWriter, r *http.Request) {
 	log.Println("call PUT UserUpdate()")
@@ -124,7 +126,10 @@ func (e Env) UserUpdate(w http.ResponseWriter, r *http.Request) {
 	} else {
 		log.Println("Success u.SetPass()")
 	}
-	editUser, err := u.Update(e.DB)
-	fmt.Println("Result User inserted to DB: ", editUser)
+	updateUser, err := u.Update(e.DB)
+	fmt.Println("Result User UPDATE to DB: ", updateUser)
+	output, _ := json.Marshal(updateUser)
+	fmt.Fprintf(w, string(output))
 }
 
+// Todo: write Method UserDel to mark deleted by field del_date

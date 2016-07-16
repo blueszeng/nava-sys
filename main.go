@@ -36,13 +36,13 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/api/v1/user", c.UserAll).Methods("GET")
-	//log.Println("start HandleFunc('/api/v1/users') GET")
+	log.Println("start HandleFunc('/api/v1/users') GET")
 	r.HandleFunc("/api/v1/user", c.UserNew).Methods("POST")
-	//log.Println("start HandleFunc('/api/v1/users') POST")
+	log.Println("start HandleFunc('/api/v1/users') POST")
 	r.HandleFunc("/api/v1/user/{id:[0-9]+}", c.UserShow).Methods("GET")
-	//log.Println("start HandleFunc('/api/v1/users/:id') GET")
+	log.Println("start HandleFunc('/api/v1/users/:id') GET")
 	r.HandleFunc("/api/v1/user/{id:[0-9]+}", c.UserUpdate).Methods("PUT")
-	//log.Println("start HandleFunc('/api/v1/users/:id') PUT")
+	log.Println("start HandleFunc('/api/v1/users/:id') PUT")
 	http.Handle("/", r)
 	http.ListenAndServe(":8080", nil)
 }

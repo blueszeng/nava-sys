@@ -29,11 +29,6 @@ func main() {
 	defer db.Close()
 	log.Println("start NewDB()")
 
-	http.HandleFunc("/api", controllers.MainIndex)
-	//log.Println("start HandleFunc('/api')")
-	http.HandleFunc("/api/v1/test", controllers.TestIndex)
-	//log.Println("start HandleFunc('/api/v1/test')")
-
 	r := mux.NewRouter()
 	r.HandleFunc("/api/v1/user", c.UserAll).Methods("GET")
 	log.Println("start HandleFunc('/api/v1/users') GET")
@@ -41,9 +36,12 @@ func main() {
 	log.Println("start HandleFunc('/api/v1/users') POST")
 	r.HandleFunc("/api/v1/user/{id:[0-9]+}", c.UserShow).Methods("GET")
 	log.Println("start HandleFunc('/api/v1/users/:id') GET")
-	r.HandleFunc("/api/v1/user/{id:[0-9]+}", c.UserUpdate).Methods("PUT")
+	r.HandleFunc("/api/v1/user", c.UserUpdate).Methods("PUT")
 	log.Println("start HandleFunc('/api/v1/users/:id') PUT")
-	r.HandleFunc("/api/v1/login", c.Login).Methods("POST")
+	r.HandleFunc("/api/v1/user/search", c.UserSearch).Methods("POST")
+	log.Println("start HandleFunc('/api/v1/user/search') POST")
+	r.HandleFunc("/api/v1/login", c.UserLogin).Methods("POST")
+	log.Println("start HandleFunc('/api/v1/login') POST")
 	http.Handle("/", r)
 	http.ListenAndServe(":8080", nil)
 }

@@ -6,3 +6,6 @@ type APIResponse struct {
 	Result interface{}
 }
 
+type APISearch struct {
+	Name string
+}

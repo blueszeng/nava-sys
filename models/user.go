@@ -59,7 +59,6 @@ func (u *User) All(db *sql.DB) ([]*User, error) {
 		users = append(users, i)
 		log.Println("users= ",users, "u= ", i)
 	}
-
 	log.Println("return users", users)
 	return users, nil
 }
@@ -83,7 +82,14 @@ func (u *User) New(db *sql.DB) (*User, error) {
 
 	// test query data
 	n := new(User)
-	err = db.QueryRow("SELECT id, name, secret FROM user WHERE id = ?", lastID).Scan(&n.ID, &n.Name, &n.Secret)
+	err = db.QueryRow(
+		"SELECT id, name, secret FROM user WHERE id = ?",
+		lastID,
+	).Scan(
+		&n.ID,
+		&n.Name,
+		//&n.Secret,
+	)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Fatal("Error not found: ", err)
@@ -95,7 +101,7 @@ func (u *User) New(db *sql.DB) (*User, error) {
 	return n, nil
 }
 
-// Edit/UpdateUser by id
+// UpdateUser by id
 func (u *User) Update(db *sql.DB) (*User, error) {
 	log.Println(">>start models.user.Update() method")
 	// TODO: Check if no exist user.Name // return error and ask to create new user.
@@ -198,7 +204,7 @@ func (u *User) SearchByName(db *sql.DB) error{
 	return nil
 }
 
-//TODO: function models.User.SearchUsers() here!
+// function models.User.SearchUsers() here!
 
 func SearchUsers(db *sql.DB, s string) (Users, error) {
 	s = "%" + strings.ToLower(s) + "%"

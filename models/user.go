@@ -6,6 +6,7 @@ import (
 	"log"
 	"errors"
 	"strings"
+	"time"
 )
 
 type User struct {
@@ -22,15 +23,14 @@ type Users []*User
 
 func (u *User) Show(db *sql.DB) (*User, error) {
 	err := db.QueryRow(
-		"SELECT * FROM user WHERE id = ?",
+		"SELECT id, name FROM user WHERE id = ?",
 		u.ID,
 	).Scan(
 		&u.ID,
 		&u.Name,
-		&u.Secret,
 	)
 	if err != nil {
-		log.Println("Error SELECT * in user.Show:", err)
+		log.Println("Error SELECT in user.Show:", err)
 		return nil, err
 	}
 	return u, nil
@@ -38,7 +38,8 @@ func (u *User) Show(db *sql.DB) (*User, error) {
 
 func (u *User) All(db *sql.DB) ([]*User, error) {
 	log.Println(">>> start AllUsers() >> db = ", db)
-	rows, err := db.Query("SELECT * FROM user")
+	rows, err := db.Query(
+		"SELECT id, name FROM user")
 	if err != nil {
 		log.Println(">>> db.Query Error= ", err)
 		return nil, err
@@ -51,7 +52,6 @@ func (u *User) All(db *sql.DB) ([]*User, error) {
 		err := rows.Scan(
 			&i.ID,
 			&i.Name,
-			&i.Secret,
 		)
 		if err != nil {
 			log.Println(">>> rows.Scan() Error= ", err)
@@ -84,7 +84,7 @@ func (u *User) New(db *sql.DB) (*User, error) {
 	// test query data
 	n := new(User)
 	err = db.QueryRow(
-		"SELECT id, name, secret FROM user WHERE id = ?",
+		"SELECT id, name FROM user WHERE id = ?",
 		lastID,
 	).Scan(
 		&n.ID,
@@ -108,12 +108,11 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 	// TODO: Check if no exist user.Name // return error and ask to create new user.
 	existUser := User{}
 	err := db.QueryRow(
-		"SELECT id, name, secret FROM user WHERE id = ?",
+		"SELECT id, name FROM user WHERE id = ?",
 		u.ID,
 	).Scan(
 		&existUser.ID,
 		&existUser.Name,
-		&existUser.Secret,
 	)
 	if err != nil {
 		log.Panic("Error db.QueryRow in user.Update()", err)
@@ -163,12 +162,6 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 	return &n, nil
 }
 
-// TODO: Method models.User.Del to delete User (Later we will implement my framework just add delete DateX
-func (u *User) Delete(db *sql.DB) error {
-	//TODO: Code to DELETE here.
-	return nil
-}
-
 func (u *User) SetPass() error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -189,7 +182,7 @@ func (u *User) VerifyPass(p string) error { // not export call from Add() or Upd
 	return nil
 }
 
-func (u *User) SearchByName(db *sql.DB) error{
+func (u *User) FindByName(db *sql.DB) error{
 	err := db.QueryRow(
 		"SELECT id, name, secret FROM user WHERE name = ?",
 		u.Name,
@@ -202,6 +195,21 @@ func (u *User) SearchByName(db *sql.DB) error{
 		log.Println(err)
 		return err
 	}
+	return nil
+}
+// TODO: Method models.User.Del to delete User (Later we will implement my framework just add delete DateX
+func (u *User) Delete(db *sql.DB) error {
+	query := "UPDATE user SET deleted_at = ? WHERE id = ?"
+	rs, err := db.Exec(query, time.Now(), u.ID)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	rowCnt, err := rs.RowsAffected()
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println("Delete row:", rowCnt)
 	return nil
 }
 

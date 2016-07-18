@@ -55,13 +55,13 @@ func (e *Env) UserNew(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&u)
 	if err != nil {
-		log.Fatal("Error decode.Decode(&u) >>", err)
+		log.Println("Error decode.Decode(&u) >>", err)
 	}
 	log.Println("Success decode JSON -> :", u, " Result user decoded -> ", u)
 	// hash password to []byte before assign to u.Password with function SetPass
 	err = u.SetPass()
 	if err != nil {
-		log.Fatal("Error u.SetPass(): ", err)
+		log.Println("Error u.SetPass(): ", err)
 	} else {
 		log.Println("Success u.SetPass()")
 	}
@@ -97,7 +97,7 @@ func (e Env) UserShow(w http.ResponseWriter, r *http.Request) {
 
 	n, err := u.Show(e.DB)
 	if err != nil {
-		log.Fatal("Error u.Show in c.user.go.Show:", err)
+		log.Println("Error u.Show in c.user.go.Show:", err)
 	}
 	output, _ := json.Marshal(n)
 	fmt.Fprintf(w, string(output))
@@ -119,7 +119,7 @@ func (e Env) UserUpdate(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&u)
 	if err != nil {
-		log.Fatal("Error decode.Decode(&u) >>", err)
+		log.Println("Error decode.Decode(&u) >>", err)
 	}
 
 	updateUser, err := u.Update(e.DB)
@@ -147,7 +147,7 @@ func (e Env) UserLogin(w http.ResponseWriter, r *http.Request) {
 	log.Println("Success decode JSON -> :", u, " Result user decoded -> ", u)
 
 	// Read User.ID, User.Secret by User.Name from DB
-	err = u.SearchByName(e.DB)
+	err = u.FindByName(e.DB)
 	if err != nil {
 		log.Println(err)
 	}
@@ -206,3 +206,6 @@ func (e Env) UserSearch(w http.ResponseWriter, r *http.Request) {
 }
 
 // Todo: UserDel Method to mark deleted by field del_date
+func (e Env) Delete(w http.ResponseWriter, r *http.Request) {
+
+}

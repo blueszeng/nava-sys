@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	DB_HOST = "tcp(nava.work:3306)"
+	DB_HOST = "tcp(172.17.0.3:3306)"
 	DB_NAME = "nava"
 	DB_USER = "root"
 	DB_PASS = "mypass"

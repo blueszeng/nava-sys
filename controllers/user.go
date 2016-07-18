@@ -93,7 +93,7 @@ func (e Env) UserShow(w http.ResponseWriter, r *http.Request) {
 	v := mux.Vars(r)
 	userID := v["id"]
 	u := new(models.User)
-	u.ID, _ = strconv.ParseInt(userID, 10, 64)
+	u.ID, _ = strconv.ParseUint(userID, 10, 64)
 
 	n, err := u.Show(e.DB)
 	if err != nil {
@@ -142,7 +142,7 @@ func (e Env) UserLogin(w http.ResponseWriter, r *http.Request) {
 	decode := json.NewDecoder(r.Body)
 	err := decode.Decode(&u)
 	if err != nil {
-		log.Fatal("Error decode.Decode(&u) >>", err)
+		log.Println("Error decode.Decode(&u) >>", err)
 	}
 	log.Println("Success decode JSON -> :", u, " Result user decoded -> ", u)
 
@@ -184,7 +184,7 @@ func (e Env) UserSearch(w http.ResponseWriter, r *http.Request) {
 	err := decode.Decode(&s)
 	log.Println("Search string 'name'=", s.Name)
 	if err != nil {
-		log.Fatal("Error decode.Decode(&u) >>", err)
+		log.Println("Error decode.Decode(&u) >>", err)
 	}
 	log.Println("Success decode JSON -> :", s)
 

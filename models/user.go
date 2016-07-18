@@ -9,7 +9,8 @@ import (
 )
 
 type User struct {
-	ID       int64  `json:"id"`
+	//ID       uint64  `json:"id"`
+	Base
 	Name     string `json:"name"`
 	Password string `json:"password"` // just for receive JSON plain-text password but not store in DB
 	Secret   []byte
@@ -29,7 +30,7 @@ func (u *User) Show(db *sql.DB) (*User, error) {
 		&u.Secret,
 	)
 	if err != nil {
-		log.Fatal("Error SELECT * in user.Show:", err)
+		log.Println("Error SELECT * in user.Show:", err)
 		return nil, err
 	}
 	return u, nil
@@ -92,9 +93,9 @@ func (u *User) New(db *sql.DB) (*User, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			log.Fatal("Error not found: ", err)
+			log.Println("Error not found: ", err)
 		} else {
-			log.Fatal(err)
+			log.Println(err)
 		}
 	}
 	log.Println("Success insert record: ", n)
@@ -171,7 +172,7 @@ func (u *User) Delete(db *sql.DB) error {
 func (u *User) SetPass() error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 		return err
 	}
 	u.Secret = hash

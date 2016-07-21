@@ -65,7 +65,7 @@ func (u *User) All(db *sql.DB) ([]*User, error) {
 }
 
 // Insert New User
-func (u *User) New(db *sql.DB) (*User, error) {
+func (u *User) Insert(db *sql.DB) (*User, error) {
 	log.Println(">>start User.New() method")
 	rs, err := db.Exec(
 		"INSERT INTO user (name, secret) VALUES(?, ?)",

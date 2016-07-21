@@ -32,7 +32,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/api/v1/user", c.UserAll).Methods("GET")
 	log.Println("start HandleFunc('/api/v1/users') GET UserAll")
-	r.HandleFunc("/api/v1/user", c.UserNew).Methods("POST")
+	r.HandleFunc("/api/v1/user", c.UserInsert).Methods("POST")
 	log.Println("start HandleFunc('/api/v1/users') POST UserNew")
 	r.HandleFunc("/api/v1/user/{id:[0-9]+}", c.UserShow).Methods("GET")
 	log.Println("start HandleFunc('/api/v1/users/:id') GET UserShow")

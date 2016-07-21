@@ -41,7 +41,7 @@ func (e *Env) UserAll(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(output))
 }
 
-func (e *Env) UserNew(w http.ResponseWriter, r *http.Request) {
+func (e *Env) UserInsert(w http.ResponseWriter, r *http.Request) {
 	log.Println("call POST UserAdd()")
 	log.Println("Request Body:", r.Body)
 
@@ -66,7 +66,7 @@ func (e *Env) UserNew(w http.ResponseWriter, r *http.Request) {
 		log.Println("Success u.SetPass()")
 	}
 	// call u.New() method from models/user
-	newUser, err := u.New(e.DB)
+	newUser, err := u.Insert(e.DB)
 	rs := models.APIResponse{}
 	if err != nil {
 		// Todo: reply error message with JSON

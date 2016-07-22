@@ -29,37 +29,27 @@ func main() {
 	defer db.Close()
 	log.Println("start NewDB()")
 
-	r := mux.NewRouter()
-
+	// แก้ปัญหา"/" ปิดท้าย URI แล้ว 404 page not found
+	// .StrictSlash(true) help ignore last "/" in URI
+	r := mux.NewRouter().StrictSlash(true)
 	// User
-	r.HandleFunc("/api/v1/user", c.UserAll).Methods("GET")
-	log.Println("start '/api/v1/user' GET UserAll")
-	r.HandleFunc("/api/v1/user", c.UserInsert).Methods("POST")
-	log.Println("start '/api/v1/user' POST UserNew")
-	r.HandleFunc("/api/v1/user/{id:[0-9]+}", c.UserShow).Methods("GET")
-	log.Println("start '/api/v1/user/:id' GET UserShow")
-	r.HandleFunc("/api/v1/user/{id:[0-9]+}", c.UserUpdate).Methods("PUT")
-	log.Println("start'/api/v1/user/:id' PUT UserUpdate ")
-	r.HandleFunc("/api/v1/user/search", c.UserSearch).Methods("POST")
-	log.Println("start '/api/v1/user/search' POST UserSearch")
-	r.HandleFunc("/api/v1/login", c.UserLogin).Methods("POST")
-	log.Println("start '/api/v1/login' POST UserLogin")
-	r.HandleFunc("/api/v1/user/{id:[0-9]+}", c.UserDelete).Methods("DELETE")
-	log.Println("start '/api/v1/user/:id' DELETE UserDelete")
-	r.HandleFunc("/api/v1/user/{id:[0-9]+}/undelete", c.UserUndelete).Methods("PUT")
-	log.Println("start '/api/v1/user/:id/undelete' PUT UserUndelete")
-
+	s := r.PathPrefix("/api/v1/user").Subrouter()
+	s.HandleFunc("/", c.UserAll).Methods("GET"); log.Println("/api/v1/user GET UserAll")
+	s.HandleFunc("/", c.UserInsert).Methods("POST"); log.Println("/api/v1/user POST UserNew")
+	s.HandleFunc("/{id:[0-9]+}", c.UserShow).Methods("GET"); log.Println("/api/v1/user/:id GET UserShow")
+	s.HandleFunc("/{id:[0-9]+}", c.UserUpdate).Methods("PUT"); log.Println("/api/v1/user/:id PUT UserUpdate ")
+	s.HandleFunc("/search", c.UserSearch).Methods("POST"); log.Println("/api/v1/user/search POST UserSearch")
+	s.HandleFunc("/login", c.UserLogin).Methods("POST"); log.Println("/api/v1/login POST UserLogin")
+	s.HandleFunc("/{id:[0-9]+}", c.UserDelete).Methods("DELETE"); log.Println("start '/api/v1/user/:id' DELETE UserDelete")
+	s.HandleFunc("/{id:[0-9]+}/undelete", c.UserUndelete).Methods("PUT"); log.Println("start '/api/v1/user/:id/undelete' PUT UserUndelete")
 	// Menu
-	r.HandleFunc("/api/v1/menu", c.MenuAll).Methods("GET")
-	log.Println("start Router GET MenuAll")
-	r.HandleFunc("/api/v1/menu", c.MenuInsert).Methods("POST")
-	log.Println("start Router POST MenuNew")
-	r.HandleFunc("/api/v1/menu/tree", c.MenuTree).Methods("GET")
-	log.Println("start Router GET MenuTree")
+	s = r.PathPrefix("/api/v1/menu").Subrouter()
+	s.HandleFunc("/", c.MenuAll).Methods("GET"); log.Println("start Router GET MenuAll")
+	s.HandleFunc("/", c.MenuInsert).Methods("POST"); log.Println("start Router POST MenuNew")
+	s.HandleFunc("/tree", c.MenuTree).Methods("GET"); log.Println("start Router GET MenuTree")
 
 	http.Handle("/", r)
 	http.ListenAndServe(":8000", nil)
 	//http.ListenAndServe(":8000", Handlers(c))
 }
 
-// Todo: แก้ปัญหา"/" ปิดท้าย URI แล้ว 404 page not found

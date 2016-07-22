@@ -4,30 +4,31 @@ import (
 	"database/sql"
 	"golang.org/x/crypto/bcrypt"
 	"log"
-	"errors"
 	"strings"
 	"time"
 )
 
 type User struct {
-	//ID       uint64  `json:"id"`
 	Base
 	Name     string `json:"name"`
 	Password string `json:"password"` // just for receive JSON plain-text password but not store in DB
 	Secret   []byte
-	//PeopleID sql.NullInt64 `json:people_id` // TODO: ยังไม่รู้จะรับค่า JSON decode มาใส่ sql.NullXYZ ยังไง เ
-	// TODO: เนื่องจาก sql.NullXYZ เป็น struct {???: ???, Valid: boolean}
+	//PeopleID sql.NullInt64 `json:people_id` /ยังไม่รู้จะรับค่า JSON decode มาใส่ sql.NullXYZ ยังไง เ
+	// เนื่องจาก sql.NullXYZ เป็น struct {???: ???, Valid: boolean}
 }
 
 type Users []*User
 
 func (u *User) Show(db *sql.DB) (*User, error) {
 	err := db.QueryRow(
-		"SELECT id, name FROM user WHERE id = ?",
+		"SELECT id, name, created_at, updated_at, deleted_at FROM user WHERE id = ?",
 		u.ID,
 	).Scan(
 		&u.ID,
 		&u.Name,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+		&u.DeletedAt,
 	)
 	if err != nil {
 		log.Println("Error SELECT in user.Show:", err)
@@ -39,7 +40,7 @@ func (u *User) Show(db *sql.DB) (*User, error) {
 func (u *User) All(db *sql.DB) ([]*User, error) {
 	log.Println(">>> start AllUsers() >> db = ", db)
 	rows, err := db.Query(
-		"SELECT id, name FROM user")
+		"SELECT id, name, created_at, updated_at, deleted_at FROM user")
 	if err != nil {
 		log.Println(">>> db.Query Error= ", err)
 		return nil, err
@@ -52,13 +53,19 @@ func (u *User) All(db *sql.DB) ([]*User, error) {
 		err := rows.Scan(
 			&i.ID,
 			&i.Name,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
 		)
 		if err != nil {
 			log.Println(">>> rows.Scan() Error= ", err)
 			return nil, err
 		}
-		users = append(users, i)
-		log.Println("users= ",users, "u= ", i)
+		// Filter only NOT Deleted User
+		if i.DeletedAt.Valid == false {
+			users = append(users, i)
+			//log.Println("users= ",users, "u= ", i)
+		}
 	}
 	log.Println("return users", users)
 	return users, nil
@@ -67,10 +74,13 @@ func (u *User) All(db *sql.DB) ([]*User, error) {
 // Insert New User
 func (u *User) Insert(db *sql.DB) (*User, error) {
 	log.Println(">>start User.New() method")
+	datetime := time.Now()
+	datetime.Format(time.RFC3339)
 	rs, err := db.Exec(
-		"INSERT INTO user (name, secret) VALUES(?, ?)",
+		"INSERT INTO user (name, secret, created_at) VALUES(?, ?, ?)",
 		u.Name,
 		u.Secret,
+		datetime,
 	) // no plain text u.Password save to DB
 	if err != nil {
 		log.Println(">>>Error cannot exec INSERT User: >>>", err)
@@ -84,12 +94,12 @@ func (u *User) Insert(db *sql.DB) (*User, error) {
 	// test query data
 	n := new(User)
 	err = db.QueryRow(
-		"SELECT id, name FROM user WHERE id = ?",
+		"SELECT id, name, created_at FROM user WHERE id = ?",
 		lastID,
 	).Scan(
 		&n.ID,
 		&n.Name,
-		//&n.Secret,
+		&n.CreatedAt,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -105,7 +115,6 @@ func (u *User) Insert(db *sql.DB) (*User, error) {
 // UpdateUser by id
 func (u *User) Update(db *sql.DB) (*User, error) {
 	log.Println(">>start models.user.Update() method")
-	// TODO: Check if no exist user.Name // return error and ask to create new user.
 	existUser := User{}
 	err := db.QueryRow(
 		"SELECT id, name FROM user WHERE id = ?",
@@ -119,23 +128,25 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 	}
 	defer db.Close()
 	log.Println("existUser: ", existUser)
-	if u.Name != existUser.Name {
-		err = errors.New("No match exist name: Do you want to create NEW User?")
-	}
-	// Ok match exist user name...Run command to update data
+
 	var rs sql.Result
-	if u.Password == "" { // Check if u.password is BLANK: So, user don't need to change password
+	var updateTime = time.Now()
+	updateTime.Format(time.RFC3339) // make Time Format fit to MariaDB.DateTime
+	log.Println("Check: t := datetime: ", updateTime)
+	if u.Password == "" { // Check if INPUT u.password is BLANK: So, user don't need to change password
 		rs, err = db.Exec(
-			"UPDATE user SET name= ? WHERE id = ?",
+			"UPDATE user SET name= ?, updated_at=? WHERE id=?",
 			u.Name,
+			updateTime,
 			existUser.ID,
 		)
 	} else {
 		u.SetPass()
 		rs, err = db.Exec(
-			"UPDATE user SET name= ?, secret= ? WHERE id =? ",
+			"UPDATE user SET name= ?, secret= ?, updated_at=? WHERE id =? ",
 			u.Name,
 			u.Secret,
+			updateTime,
 			existUser.ID,
 		)
 	}
@@ -148,12 +159,14 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 	log.Println("Number of row updated: ", countRow)
 	n := User{}
 	err = db.QueryRow(
-		"SELECT id, name, secret FROM user WHERE id =?",
+		"SELECT id, name, secret, created_at, updated_at FROM user WHERE id =?",
 		existUser.ID,
 	).Scan(
 		&n.ID,
 		&n.Name,
 		&n.Secret,
+		&n.CreatedAt,
+		&n.UpdatedAt,
 	)
 	if err != nil {
 		log.Println("Error when SELECT updated row??? >>>", err)
@@ -197,10 +210,12 @@ func (u *User) FindByName(db *sql.DB) error{
 	}
 	return nil
 }
-// TODO: Method models.User.Del to delete User (Later we will implement my framework just add delete DateX
+// Method models.User.Del to delete User (Later we will implement my framework just add delete DateX
 func (u *User) Delete(db *sql.DB) error {
-	query := "UPDATE user SET deleted_at = ? WHERE id = ?"
-	rs, err := db.Exec(query, time.Now(), u.ID)
+	delTime := time.Now()
+	delTime.Format(time.RFC3339)
+	sql := "UPDATE user SET deleted_at = ? WHERE id = ?"
+	rs, err := db.Exec(sql, delTime, u.ID)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -209,12 +224,52 @@ func (u *User) Delete(db *sql.DB) error {
 	if err != nil {
 		log.Println(err)
 	}
-	log.Println("Delete row:", rowCnt)
+	log.Println("Deleted:", rowCnt, "row(s).")
+
+	// TODO return Deleted User
+	err = db.QueryRow(
+		"SELECT id, name, deleted_at FROM user WHERE id =?",
+		u.ID,
+	).Scan(
+		&u.ID,
+		&u.Name,
+		&u.DeletedAt,
+	)
+	if err != nil {
+		log.Println("Error when SELECT updated row??? >>>", err)
+	}
+	return nil
+}
+
+func (u *User) Undelete(db *sql.DB) error {
+	sql := "UPDATE user SET deleted_at = ? WHERE id = ?"
+	rs, err := db.Exec(sql, nil, u.ID)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	rowCnt, err := rs.RowsAffected()
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println("Undeleted:", rowCnt, "row(s).")
+
+	// TODO return Deleted User
+	err = db.QueryRow(
+		"SELECT id, name, deleted_at FROM user WHERE id =?",
+		u.ID,
+	).Scan(
+		&u.ID,
+		&u.Name,
+		&u.DeletedAt,
+	)
+	if err != nil {
+		log.Println("Error when SELECT updated row??? >>>", err)
+	}
 	return nil
 }
 
 // function models.User.SearchUsers() here!
-
 func SearchUsers(db *sql.DB, s string) (Users, error) {
 	s = "%" + strings.ToLower(s) + "%"
 	stmt, err := db.Prepare("SELECT id, name FROM user WHERE LOWER(name) LIKE ?")

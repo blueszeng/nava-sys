@@ -69,7 +69,7 @@ func (e *Env) UserInsert(w http.ResponseWriter, r *http.Request) {
 	newUser, err := u.Insert(e.DB)
 	rs := models.APIResponse{}
 	if err != nil {
-		// Todo: reply error message with JSON
+		// reply error message with JSON
 		rs.Status = "300"
 		rs.Message = err.Error()
 	} else {
@@ -91,9 +91,9 @@ func (e Env) UserShow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	v := mux.Vars(r)
-	userID := v["id"]
+	id := v["id"]
 	u := new(models.User)
-	u.ID, _ = strconv.ParseUint(userID, 10, 64)
+	u.ID, _ = strconv.ParseUint(id, 10, 64)
 
 	n, err := u.Show(e.DB)
 	if err != nil {
@@ -111,23 +111,59 @@ func (e Env) UserUpdate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(500), 500)
 		return
 	}
-	u := new(models.User)
-	//v := mux.Vars(r)
-	//userID := v["id"]
-	//u.ID, _ = strconv.ParseInt(userID, 10, 64)
 
+	u := new(models.User)
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&u)
 	if err != nil {
 		log.Println("Error decode.Decode(&u) >>", err)
 	}
+	log.Println("1. After decoder Check decoder, u= ", decoder, u)
+	v := mux.Vars(r)
+	userID := v["id"]
+	u.ID, _ = strconv.ParseUint(userID, 10, 64)
+	log.Println("2. Check v, u= ", v, u)
 
-	updateUser, err := u.Update(e.DB)
+	updateUser, _ := u.Update(e.DB)
 	fmt.Println("Result User UPDATE to DB: ", updateUser)
 	output, _ := json.Marshal(updateUser)
 	fmt.Fprintf(w, string(output))
 }
 
+// UserDelete Method to mark deleted by field User.DeletedAt.Valid == true
+func (e Env) UserDelete(w http.ResponseWriter, r *http.Request){
+	log.Println("call GET UserDelete() Method:", r.Method)
+	if r.Method != "DELETE" {
+		http.Error(w, http.StatusText(500), 500)
+		return
+	}
+
+	v := mux.Vars(r)
+	id := v["id"]
+	u := new(models.User)
+	u.ID, _ = strconv.ParseUint(id, 10, 64)
+
+	_ = u.Delete(e.DB)
+	output, _ := json.Marshal(u)
+	fmt.Fprintf(w, string(output))
+}
+// TODO: UserUndelete Method
+func (e Env) UserUndelete(w http.ResponseWriter, r *http.Request) {
+	log.Println("call GET UserUndelete() Method:", r.Method)
+	if r.Method != "PUT" {
+		http.Error(w, http.StatusText(500), 500)
+		return
+	}
+	v := mux.Vars(r)
+	id := v["id"]
+	u := new(models.User)
+	u.ID, _ = strconv.ParseUint(id, 10, 64)
+
+	u.Undelete(e.DB)
+	output, _ := json.Marshal(u)
+	fmt.Fprintf(w, string(output))
+
+}
 // Login Endpoint
 func (e Env) UserLogin(w http.ResponseWriter, r *http.Request) {
 	log.Println("call POST Login()")
@@ -169,9 +205,9 @@ func (e Env) UserLogin(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(output))
 }
 
-// Todo: UserSearch Method output JSON user.id for client use id as parameter in UserUpdate
+// UserSearch Method output JSON user.id for client use id as parameter in UserUpdate
 func (e Env) UserSearch(w http.ResponseWriter, r *http.Request) {
-	log.Println("call GET UserSearch()")
+	log.Println("call GET UserSearch() Method:", r.Method)
 
 	if r.Method != "POST" {
 		http.Error(w, http.StatusText(500), 500)
@@ -203,9 +239,4 @@ func (e Env) UserSearch(w http.ResponseWriter, r *http.Request) {
 	}
 	output, _ := json.Marshal(rs)
 	fmt.Fprintf(w, string(output))
-}
-
-// Todo: UserDel Method to mark deleted by field del_date
-func (e Env) Delete(w http.ResponseWriter, r *http.Request) {
-
 }

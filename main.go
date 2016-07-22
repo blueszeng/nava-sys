@@ -9,9 +9,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//TODO: Move Config to JSON file and Create Config{} to handle DB const.
 const (
+	//TODO: เมื่อรันจริงต้องเปลี่ยนเป็น Docker Network Bridge IP เช่น 172.17.0.3 เป็นต้น
 	DB_HOST = "tcp(nava.work:3306)"
-	DB_NAME = "nava"
+	DB_NAME = "system"
 	DB_USER = "root"
 	DB_PASS = "mypass"
 )
@@ -23,9 +25,7 @@ func main() {
 	if err != nil {
 		log.Panic("NewDB() Error:", err)
 	}
-
 	c := &controllers.Env{DB: db}
-
 	defer db.Close()
 	log.Println("start NewDB()")
 
@@ -49,13 +49,17 @@ func main() {
 	r.HandleFunc("/api/v1/user/{id:[0-9]+}/undelete", c.UserUndelete).Methods("PUT")
 	log.Println("start '/api/v1/user/:id/undelete' PUT UserUndelete")
 
-
-	// # Stock
-
-	// ## Item
-
-	// ## Location
+	// Menu
+	r.HandleFunc("/api/v1/menu", c.MenuAll).Methods("GET")
+	log.Println("start Router GET MenuAll")
+	r.HandleFunc("/api/v1/menu", c.MenuInsert).Methods("POST")
+	log.Println("start Router POST MenuNew")
+	r.HandleFunc("/api/v1/menu/tree", c.MenuTree).Methods("GET")
+	log.Println("start Router GET MenuTree")
 
 	http.Handle("/", r)
 	http.ListenAndServe(":8000", nil)
+	//http.ListenAndServe(":8000", Handlers(c))
 }
+
+// Todo: แก้ปัญหา"/" ปิดท้าย URI แล้ว 404 page not found

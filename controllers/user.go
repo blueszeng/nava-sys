@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -10,10 +9,6 @@ import (
 	"net/http"
 	"strconv"
 )
-
-type Env struct {
-	DB *sql.DB
-}
 
 func (e *Env) UserAll(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserIndex()")

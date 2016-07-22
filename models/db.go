@@ -2,7 +2,7 @@ package models
 
 import (
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 	"log"
 )
 
@@ -19,3 +19,33 @@ func NewDB(dsn string) (*sql.DB, error){
 	log.Println("db = ", db)
 	return db, nil //return db so in main can call defer db.Close()
 }
+
+// Base structure contains fields that are common to objects
+// returned by the nava's REST API.
+type Base struct {
+	ID        uint64         `json:"id"`
+	CreatedAt mysql.NullTime `json:"created_at"` //todo: change datatype to sql.NullTime
+	UpdatedAt mysql.NullTime `json:"updated_at"`
+	DeletedAt mysql.NullTime `json:"deleted_at"`
+}
+// If record deleted Unique field can not be duplicated
+// Delete  bool           `json:"deleted"`
+// Status Status 	`json:"status"`
+
+type APIResponse struct {
+	Status  string
+	Message string
+	Result  interface{}
+}
+
+// Structure for collection of search string for frontend request.
+type APISearch struct {
+	Name string
+}
+type Status int
+const (
+	ACTIVE Status = 1 + iota
+	HOLD
+	SUSPEND
+)
+

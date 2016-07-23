@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 	"time"
+	"errors"
 )
 
 type User struct {
@@ -13,8 +14,6 @@ type User struct {
 	Name     string `json:"name"`
 	Password string `json:"password"` // just for receive JSON plain-text password but not store in DB
 	Secret   []byte
-	//PeopleID sql.NullInt64 `json:people_id` /ยังไม่รู้จะรับค่า JSON decode มาใส่ sql.NullXYZ ยังไง เ
-	// เนื่องจาก sql.NullXYZ เป็น struct {???: ???, Valid: boolean}
 }
 
 type Users []*User
@@ -33,6 +32,10 @@ func (u *User) Show(db *sql.DB) (*User, error) {
 	if err != nil {
 		log.Println("Error SELECT in user.Show:", err)
 		return nil, err
+	}
+	// Filter only NOT Deleted User
+	if u.DeletedAt.Valid == true {
+		return nil, errors.New("User Deleted. - ผู้ใช้คนนี้ถูกลบแล้ว")
 	}
 	return u, nil
 }
@@ -64,7 +67,6 @@ func (u *User) Index(db *sql.DB) ([]*User, error) {
 		// Filter only NOT Deleted User
 		if i.DeletedAt.Valid == false {
 			users = append(users, i)
-			//log.Println("users= ",users, "u= ", i)
 		}
 	}
 	log.Println("return users", users)
@@ -237,6 +239,7 @@ func (u *User) Delete(db *sql.DB) error {
 	)
 	if err != nil {
 		log.Println("Error when SELECT updated row??? >>>", err)
+		return err
 	}
 	return nil
 }

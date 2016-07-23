@@ -29,6 +29,11 @@ type Base struct {
 	UpdatedAt mysql.NullTime `json:"updated_at"`
 	DeletedAt mysql.NullTime `json:"deleted_at"`
 }
+
+//func (b *Base) Delete(db *sql.DB) error {
+//	return nil
+//}
+
 // If record deleted Unique field can not be duplicated
 // Delete  bool           `json:"deleted"`
 // Status Status 	`json:"status"`

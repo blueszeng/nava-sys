@@ -26,7 +26,7 @@ func (e *Env) UserIndex(w http.ResponseWriter, r *http.Request) {
 		rs.Message = err.Error()
 	} else {
 		rs.Status = "200"
-		rs.Message = "SUCCESS"
+		rs.Message = "OK"
 		rs.Result = users
 	}
 	output, err := json.Marshal(rs)
@@ -73,8 +73,7 @@ func (e *Env) UserInsert(w http.ResponseWriter, r *http.Request) {
 		rs.Result = newUser
 	}
 	output, _ := json.Marshal(rs)
-	fmt.Fprintf(w, string(output))
-	fmt.Println("Result User inserted to DB: ", newUser)
+	fmt.Fprintf(w, "%s" ,string(output))
 }
 
 // Method UserShow to query 1 row of user match u.id
@@ -89,13 +88,21 @@ func (e Env) UserShow(w http.ResponseWriter, r *http.Request) {
 	id := v["id"]
 	u := new(models.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
+	log.Println("Print u.ID", id)
 
-	n, err := u.Show(e.DB)
+	user, err := u.Show(e.DB)
+
+	rs := models.APIResponse{}
 	if err != nil {
-		log.Println("Error u.Show in c.user.go.Show:", err)
+		rs.Status = "204"
+		rs.Message = "No Content" + err.Error()
+	} else {
+		rs.Status = "200"
+		rs.Message = "OK"
+		rs.Result = user
 	}
-	output, _ := json.Marshal(n)
-	fmt.Fprintf(w, string(output))
+	o, _ := json.Marshal(rs)
+	fmt.Fprintf(w, "%s", string(o))
 }
 
 func (e Env) UserUpdate(w http.ResponseWriter, r *http.Request) {
@@ -121,8 +128,18 @@ func (e Env) UserUpdate(w http.ResponseWriter, r *http.Request) {
 
 	updateUser, _ := u.Update(e.DB)
 	fmt.Println("Result User UPDATE to DB: ", updateUser)
-	output, _ := json.Marshal(updateUser)
-	fmt.Fprintf(w, string(output))
+
+	rs := models.APIResponse{}
+	if err != nil {
+		rs.Status = "304"
+		rs.Message = "Not Modified" + err.Error()
+	} else {
+		rs.Status = "200"
+		rs.Message = "Update OK"
+		rs.Result = updateUser
+	}
+	output, _ := json.Marshal(rs)
+	fmt.Fprintf(w, "%s", string(output))
 }
 
 // UserDelete Method to mark deleted by field User.DeletedAt.Valid == true
@@ -138,9 +155,18 @@ func (e Env) UserDelete(w http.ResponseWriter, r *http.Request){
 	u := new(models.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
 
-	_ = u.Delete(e.DB)
-	output, _ := json.Marshal(u)
-	fmt.Fprintf(w, string(output))
+	err := u.Delete(e.DB)
+	rs := models.APIResponse{}
+	if err != nil {
+		rs.Status = "304"
+		rs.Message = "Not Modified" + err.Error()
+	} else {
+		rs.Status = "200"
+		rs.Message = "DELETED OK"
+		rs.Result = u
+	}
+	output, _ := json.Marshal(rs)
+	fmt.Fprintf(w, "%s", string(output))
 }
 // TODO: UserUndelete Method
 func (e Env) UserUndelete(w http.ResponseWriter, r *http.Request) {
@@ -154,9 +180,18 @@ func (e Env) UserUndelete(w http.ResponseWriter, r *http.Request) {
 	u := new(models.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
 
-	u.Undelete(e.DB)
-	output, _ := json.Marshal(u)
-	fmt.Fprintf(w, string(output))
+	err := u.Undelete(e.DB)
+	rs := models.APIResponse{}
+	if err != nil {
+		rs.Status = "304"
+		rs.Message = "Not Modified" + err.Error()
+	} else {
+		rs.Status = "200"
+		rs.Message = "UNDELETED OK"
+		rs.Result = u
+	}
+	output, _ := json.Marshal(rs)
+	fmt.Fprintf(w, "%s",string(output))
 
 }
 // Login Endpoint
@@ -194,10 +229,10 @@ func (e Env) UserLogin(w http.ResponseWriter, r *http.Request) {
 	} else {
 		log.Println("Verify Password PASS!!")
 		rs.Status = "200"
-		rs.Message = "SUCCESS"
+		rs.Message = "LOGIN SUCCESS"
 	}
 	output, _ := json.Marshal(rs)
-	fmt.Fprintf(w, string(output))
+	fmt.Fprintf(w, "%s", string(output))
 }
 
 // UserSearch Method output JSON user.id for client use id as parameter in UserUpdate
@@ -233,5 +268,5 @@ func (e Env) UserSearch(w http.ResponseWriter, r *http.Request) {
 		rs.Result = users
 	}
 	output, _ := json.Marshal(rs)
-	fmt.Fprintf(w, string(output))
+	fmt.Fprintf(w, "%s", string(output))
 }

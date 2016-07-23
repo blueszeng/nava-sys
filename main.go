@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"encoding/json"
-	"fmt"
 )
 
 //TODO: เมื่อรันจริงต้องเปลี่ยนเป็น Docker Network Bridge IP เช่น 172.17.0.3 เป็นต้น
@@ -29,7 +28,6 @@ func main() {
 	if err != nil {
 		log.Println("error:", err)
 	}
-	fmt.Println(config.DBUser) // test print data
 
 	var dsn = config.DBUser + ":" + config.DBPass + "@" + config.DBHost + "/" + config.DBName + "?parseTime=true"
 
@@ -40,8 +38,14 @@ func main() {
 	}
 	c := &controllers.Env{DB: db}
 	defer db.Close()
-	log.Println("start NewDB()")
 
+	r := SetupRouter(c)
+
+	http.Handle("/", r)
+	http.ListenAndServe(":8000", nil)
+}
+
+func SetupRouter(c *controllers.Env) *mux.Router{
 	// แก้ปัญหา"/" ปิดท้าย URI แล้ว 404 page not found
 	// .StrictSlash(true) help ignore last "/" in URI
 	r := mux.NewRouter().StrictSlash(true)
@@ -72,7 +76,5 @@ func main() {
 	s.HandleFunc("/tree", c.MenuTree).Methods("GET")
 	log.Println("start Router GET MenuTree")
 
-	http.Handle("/", r)
-	http.ListenAndServe(":8000", nil)
+	return r
 }
-

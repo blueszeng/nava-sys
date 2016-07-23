@@ -30,7 +30,7 @@ func (e Env) ShowUser(w http.ResponseWriter, r *http.Request) {
 	rs := api.Response{}
 	if err != nil {
 		rs.Status = "204"
-		rs.Message = "No Content" + err.Error()
+		rs.Message = "No Content: " + err.Error()
 	} else {
 		rs.Status = "200"
 		rs.Message = "OK"
@@ -68,7 +68,7 @@ func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	rs := api.Response{}
 	if err != nil {
 		rs.Status = "304"
-		rs.Message = "Not Modified" + err.Error()
+		rs.Message = "Not Modified: " + err.Error()
 	} else {
 		rs.Status = "200"
 		rs.Message = "Update OK"
@@ -161,7 +161,7 @@ func (e Env) DelUser(w http.ResponseWriter, r *http.Request){
 	rs := api.Response{}
 	if err != nil {
 		rs.Status = "304"
-		rs.Message = "Not Modified" + err.Error()
+		rs.Message = "Not Modified: " + err.Error()
 	} else {
 		rs.Status = "200"
 		rs.Message = "DELETED OK"

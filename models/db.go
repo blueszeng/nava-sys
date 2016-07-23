@@ -16,6 +16,9 @@ func NewDB(dsn string) (*sql.DB, error){
 		log.Panic("db.Ping() Error>>", err)
 		return nil, err
 	}
+	db.SetConnMaxLifetime(0)
+	db.SetMaxIdleConns(100)
+	db.SetMaxOpenConns(0)
 	log.Println("db = ", db)
 	return db, nil //return db so in main can call defer db.Close()
 }

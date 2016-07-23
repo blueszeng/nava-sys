@@ -42,6 +42,10 @@ func (u *User) Show(db *sql.DB) (*User, error) {
 
 func (u *User) All(db *sql.DB) ([]*User, error) {
 	log.Println(">>> start AllUsers() >> db = ", db)
+	err := db.Ping()
+	if err != nil {
+		log.Println("Ping Error", err)
+	}
 	rows, err := db.Query(
 		"SELECT id, name, created, updated, deleted FROM user")
 	if err != nil {
@@ -128,7 +132,7 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 	if err != nil {
 		log.Panic("Error db.QueryRow in user.Update()", err)
 	}
-	defer db.Close()
+	//defer db.Close()
 	log.Println("existUser: ", existUser)
 
 	var rs sql.Result

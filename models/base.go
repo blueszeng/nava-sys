@@ -7,10 +7,10 @@ import (
 // Base structure contains fields that are common to objects
 // returned by the nava's REST API.
 type Base struct {
-	ID        uint64         `json:"id"`
-	CreatedAt mysql.NullTime `json:"created_at"` //todo: change datatype to sql.NullTime
-	UpdatedAt mysql.NullTime `json:"updated_at"`
-	DeletedAt mysql.NullTime `json:"deleted_at"`
+	ID      uint64         `json:"id"`
+	Created mysql.NullTime `json:"created"` //todo: change datatype to sql.NullTime
+	Updated mysql.NullTime `json:"updated"`
+	Deleted mysql.NullTime `json:"deleted"`
 }
 
 //func (b *Base) Delete(db *sql.DB) error {

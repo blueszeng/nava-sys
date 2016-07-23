@@ -20,30 +20,30 @@ type Users []*User
 
 func (u *User) Show(db *sql.DB) (*User, error) {
 	err := db.QueryRow(
-		"SELECT id, name, created_at, updated_at, deleted_at FROM user WHERE id = ?",
+		"SELECT id, name, created, updated, deleted FROM user WHERE id = ?",
 		u.ID,
 	).Scan(
 		&u.ID,
 		&u.Name,
-		&u.CreatedAt,
-		&u.UpdatedAt,
-		&u.DeletedAt,
+		&u.Created,
+		&u.Updated,
+		&u.Deleted,
 	)
 	if err != nil {
 		log.Println("Error SELECT in user.Show:", err)
 		return nil, err
 	}
 	// Filter only NOT Deleted User
-	if u.DeletedAt.Valid == true {
+	if u.Deleted.Valid == true {
 		return nil, errors.New("User Deleted. - ผู้ใช้คนนี้ถูกลบแล้ว")
 	}
 	return u, nil
 }
 
-func (u *User) Index(db *sql.DB) ([]*User, error) {
+func (u *User) All(db *sql.DB) ([]*User, error) {
 	log.Println(">>> start AllUsers() >> db = ", db)
 	rows, err := db.Query(
-		"SELECT id, name, created_at, updated_at, deleted_at FROM user")
+		"SELECT id, name, created, updated, deleted FROM user")
 	if err != nil {
 		log.Println(">>> db.Query Error= ", err)
 		return nil, err
@@ -56,16 +56,16 @@ func (u *User) Index(db *sql.DB) ([]*User, error) {
 		err := rows.Scan(
 			&i.ID,
 			&i.Name,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.DeletedAt,
+			&i.Created,
+			&i.Updated,
+			&i.Deleted,
 		)
 		if err != nil {
 			log.Println(">>> rows.Scan() Error= ", err)
 			return nil, err
 		}
 		// Filter only NOT Deleted User
-		if i.DeletedAt.Valid == false {
+		if i.Deleted.Valid == false {
 			users = append(users, i)
 		}
 	}
@@ -74,12 +74,12 @@ func (u *User) Index(db *sql.DB) ([]*User, error) {
 }
 
 // Insert New User
-func (u *User) Insert(db *sql.DB) (*User, error) {
+func (u *User) New(db *sql.DB) (*User, error) {
 	log.Println(">>start User.New() method")
 	datetime := time.Now()
 	datetime.Format(time.RFC3339)
 	rs, err := db.Exec(
-		"INSERT INTO user (name, secret, created_at) VALUES(?, ?, ?)",
+		"INSERT INTO user (name, secret, created) VALUES(?, ?, ?)",
 		u.Name,
 		u.Secret,
 		datetime,
@@ -96,12 +96,12 @@ func (u *User) Insert(db *sql.DB) (*User, error) {
 	// test query data
 	n := new(User)
 	err = db.QueryRow(
-		"SELECT id, name, created_at FROM user WHERE id = ?",
+		"SELECT id, name, created FROM user WHERE id = ?",
 		lastID,
 	).Scan(
 		&n.ID,
 		&n.Name,
-		&n.CreatedAt,
+		&n.Created,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -137,7 +137,7 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 	log.Println("Check: t := datetime: ", updateTime)
 	if u.Password == "" { // Check if INPUT u.password is BLANK: So, user don't need to change password
 		rs, err = db.Exec(
-			"UPDATE user SET name= ?, updated_at=? WHERE id=?",
+			"UPDATE user SET name= ?, updated=? WHERE id=?",
 			u.Name,
 			updateTime,
 			existUser.ID,
@@ -145,7 +145,7 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 	} else {
 		u.SetPass()
 		rs, err = db.Exec(
-			"UPDATE user SET name= ?, secret= ?, updated_at=? WHERE id =? ",
+			"UPDATE user SET name= ?, secret= ?, updated=? WHERE id =? ",
 			u.Name,
 			u.Secret,
 			updateTime,
@@ -161,14 +161,14 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 	log.Println("Number of row updated: ", countRow)
 	n := User{}
 	err = db.QueryRow(
-		"SELECT id, name, secret, created_at, updated_at FROM user WHERE id =?",
+		"SELECT id, name, secret, created, updated FROM user WHERE id =?",
 		existUser.ID,
 	).Scan(
 		&n.ID,
 		&n.Name,
 		&n.Secret,
-		&n.CreatedAt,
-		&n.UpdatedAt,
+		&n.Created,
+		&n.Updated,
 	)
 	if err != nil {
 		log.Println("Error when SELECT updated row??? >>>", err)
@@ -213,10 +213,10 @@ func (u *User) FindByName(db *sql.DB) error{
 	return nil
 }
 // Method models.User.Del to delete User (Later we will implement my framework just add delete DateX
-func (u *User) Delete(db *sql.DB) error {
+func (u *User) Del(db *sql.DB) error {
 	delTime := time.Now()
 	delTime.Format(time.RFC3339)
-	sql := "UPDATE user SET deleted_at = ? WHERE id = ?"
+	sql := "UPDATE user SET deleted = ? WHERE id = ?"
 	rs, err := db.Exec(sql, delTime, u.ID)
 	if err != nil {
 		log.Println(err)
@@ -230,12 +230,12 @@ func (u *User) Delete(db *sql.DB) error {
 
 	// TODO return Deleted User
 	err = db.QueryRow(
-		"SELECT id, name, deleted_at FROM user WHERE id =?",
+		"SELECT id, name, deleted FROM user WHERE id =?",
 		u.ID,
 	).Scan(
 		&u.ID,
 		&u.Name,
-		&u.DeletedAt,
+		&u.Deleted,
 	)
 	if err != nil {
 		log.Println("Error when SELECT updated row??? >>>", err)
@@ -244,8 +244,8 @@ func (u *User) Delete(db *sql.DB) error {
 	return nil
 }
 
-func (u *User) Undelete(db *sql.DB) error {
-	sql := "UPDATE user SET deleted_at = ? WHERE id = ?"
+func (u *User) Undel(db *sql.DB) error {
+	sql := "UPDATE user SET deleted = ? WHERE id = ?"
 	rs, err := db.Exec(sql, nil, u.ID)
 	if err != nil {
 		log.Println(err)
@@ -259,12 +259,12 @@ func (u *User) Undelete(db *sql.DB) error {
 
 	// TODO return Deleted User
 	err = db.QueryRow(
-		"SELECT id, name, deleted_at FROM user WHERE id =?",
+		"SELECT id, name, deleted FROM user WHERE id =?",
 		u.ID,
 	).Scan(
 		&u.ID,
 		&u.Name,
-		&u.DeletedAt,
+		&u.Deleted,
 	)
 	if err != nil {
 		log.Println("Error when SELECT updated row??? >>>", err)

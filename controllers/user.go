@@ -12,7 +12,7 @@ import (
 )
 
 // Method UserShow to query 1 row of user match u.id
-func (e Env) UserShow(w http.ResponseWriter, r *http.Request) {
+func (e Env) ShowUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserShow()")
 
 	if r.Method != "GET" {
@@ -38,9 +38,10 @@ func (e Env) UserShow(w http.ResponseWriter, r *http.Request) {
 	}
 	o, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s", string(o))
+	//TODO: Add Header content-type: application/json
 }
 
-func (e Env) UserUpdate(w http.ResponseWriter, r *http.Request) {
+func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call PUT UserUpdate()")
 	log.Println("Request Body:", r.Body)
 
@@ -77,7 +78,7 @@ func (e Env) UserUpdate(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", string(output))
 }
 
-func (e *Env) UserIndex(w http.ResponseWriter, r *http.Request) {
+func (e *Env) AllUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserIndex()")
 	if r.Method != "GET" {
 		http.Error(w, http.StatusText(500), 500)
@@ -85,7 +86,7 @@ func (e *Env) UserIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	u := models.User{}
-	users, err := u.Index(e.DB)
+	users, err := u.All(e.DB)
 	rs := api.Response{}
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
@@ -103,7 +104,7 @@ func (e *Env) UserIndex(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", string(output))
 }
 
-func (e *Env) UserInsert(w http.ResponseWriter, r *http.Request) {
+func (e *Env) NewUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call POST UserAdd()")
 	log.Println("Request Body:", r.Body)
 
@@ -128,7 +129,7 @@ func (e *Env) UserInsert(w http.ResponseWriter, r *http.Request) {
 		log.Println("Success u.SetPass()")
 	}
 	// call u.New() method from models/user
-	newUser, err := u.Insert(e.DB)
+	newUser, err := u.New(e.DB)
 	rs := api.Response{}
 	if err != nil {
 		// reply error message with JSON
@@ -144,7 +145,7 @@ func (e *Env) UserInsert(w http.ResponseWriter, r *http.Request) {
 }
 
 // UserDelete Method to mark deleted by field User.DeletedAt.Valid == true
-func (e Env) UserDelete(w http.ResponseWriter, r *http.Request){
+func (e Env) DelUser(w http.ResponseWriter, r *http.Request){
 	log.Println("call GET UserDelete() Method:", r.Method)
 	if r.Method != "DELETE" {
 		http.Error(w, http.StatusText(500), 500)
@@ -156,7 +157,7 @@ func (e Env) UserDelete(w http.ResponseWriter, r *http.Request){
 	u := new(models.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
 
-	err := u.Delete(e.DB)
+	err := u.Del(e.DB)
 	rs := api.Response{}
 	if err != nil {
 		rs.Status = "304"
@@ -170,7 +171,7 @@ func (e Env) UserDelete(w http.ResponseWriter, r *http.Request){
 	fmt.Fprintf(w, "%s", string(output))
 }
 // TODO: UserUndelete Method
-func (e Env) UserUndelete(w http.ResponseWriter, r *http.Request) {
+func (e Env) UndelUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserUndelete() Method:", r.Method)
 	if r.Method != "PUT" {
 		http.Error(w, http.StatusText(500), 500)
@@ -181,7 +182,7 @@ func (e Env) UserUndelete(w http.ResponseWriter, r *http.Request) {
 	u := new(models.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
 
-	err := u.Undelete(e.DB)
+	err := u.Undel(e.DB)
 	rs := api.Response{}
 	if err != nil {
 		rs.Status = "304"
@@ -196,7 +197,7 @@ func (e Env) UserUndelete(w http.ResponseWriter, r *http.Request) {
 
 }
 // Login Endpoint
-func (e Env) UserLogin(w http.ResponseWriter, r *http.Request) {
+func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call POST Login()")
 	log.Println("Request Body:", r.Body)
 
@@ -237,7 +238,7 @@ func (e Env) UserLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 // UserSearch Method output JSON user.id for client use id as parameter in UserUpdate
-func (e Env) UserSearch(w http.ResponseWriter, r *http.Request) {
+func (e Env) SearchUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserSearch() Method:", r.Method)
 
 	if r.Method != "POST" {

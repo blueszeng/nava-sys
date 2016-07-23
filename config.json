@@ -1,0 +1,6 @@
+{
+  "db_host": "tcp(nava.work:3306)",
+  "db_name": "system",
+  "db_user": "root",
+  "db_pass": "mypass"
+}

@@ -37,7 +37,7 @@ func (u *User) Show(db *sql.DB) (*User, error) {
 	return u, nil
 }
 
-func (u *User) All(db *sql.DB) ([]*User, error) {
+func (u *User) Index(db *sql.DB) ([]*User, error) {
 	log.Println(">>> start AllUsers() >> db = ", db)
 	rows, err := db.Query(
 		"SELECT id, name, created_at, updated_at, deleted_at FROM user")

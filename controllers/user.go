@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-func (e *Env) UserAll(w http.ResponseWriter, r *http.Request) {
+func (e *Env) UserIndex(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserIndex()")
 	if r.Method != "GET" {
 		http.Error(w, http.StatusText(500), 500)
@@ -18,7 +18,7 @@ func (e *Env) UserAll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	u := models.User{}
-	users, err := u.All(e.DB)
+	users, err := u.Index(e.DB)
 	rs := models.APIResponse{}
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)

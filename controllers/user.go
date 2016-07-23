@@ -62,13 +62,14 @@ func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	u.ID, _ = strconv.ParseUint(userID, 10, 64)
 	log.Println("2. Check v, u= ", v, u)
 
-	updateUser, _ := u.Update(e.DB)
+	updateUser, err := u.Update(e.DB)
 	fmt.Println("Result User UPDATE to DB: ", updateUser)
 
 	rs := api.Response{}
 	if err != nil {
 		rs.Status = "304"
 		rs.Message = "Not Modified: " + err.Error()
+		//rs.Result = updateUser
 	} else {
 		rs.Status = "200"
 		rs.Message = "Update OK"

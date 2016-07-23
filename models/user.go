@@ -130,7 +130,8 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 		&existUser.Name,
 	)
 	if err != nil {
-		log.Panic("Error db.QueryRow in user.Update()", err)
+		log.Println("Error db.QueryRow in user.Update()", err)
+		return nil, err
 	}
 	//defer db.Close()
 	log.Println("existUser: ", existUser)
@@ -138,7 +139,7 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 	var rs sql.Result
 	var updateTime = time.Now()
 	updateTime.Format(time.RFC3339) // make Time Format fit to MariaDB.DateTime
-	log.Println("Check: t := datetime: ", updateTime)
+	//log.Println("Check: t := datetime: ", updateTime)
 	if u.Password == "" { // Check if INPUT u.password is BLANK: So, user don't need to change password
 		rs, err = db.Exec(
 			"UPDATE user SET name= ?, updated=? WHERE id=?",
@@ -157,9 +158,10 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 		)
 	}
 	if err != nil {
-		log.Panic("Error UPDATE user...", err)
+		log.Println("Error UPDATE user...", err)
 		return nil, err
 	}
+
 	// db.QueryRow to check if correct update record
 	countRow, _ := rs.RowsAffected()
 	log.Println("Number of row updated: ", countRow)

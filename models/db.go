@@ -38,16 +38,7 @@ type Base struct {
 // Delete  bool           `json:"deleted"`
 // Status Status 	`json:"status"`
 
-type APIResponse struct {
-	Status  string
-	Message string
-	Result  interface{}
-}
 
-// Structure for collection of search string for frontend request.
-type APISearch struct {
-	Name string
-}
 type Status int
 const (
 	ACTIVE Status = 1 + iota

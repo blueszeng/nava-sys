@@ -9,6 +9,7 @@ import (
 func NewDB(dsn string) (*sql.DB, error){
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
+
 		log.Panic("sql.Open() Error>>", err)
 		return nil, err
 	}

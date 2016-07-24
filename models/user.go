@@ -2,11 +2,12 @@ package models
 
 import (
 	"database/sql"
+	"errors"
+	"github.com/go-sql-driver/mysql"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"strings"
 	"time"
-	"errors"
 )
 
 type User struct {
@@ -19,6 +20,7 @@ type User struct {
 type Users []*User
 
 func (u *User) Show(db *sql.DB) (*User, error) {
+	var deleted mysql.NullTime
 	err := db.QueryRow(
 		"SELECT id, name, created, updated, deleted FROM user WHERE id = ?",
 		u.ID,
@@ -27,14 +29,17 @@ func (u *User) Show(db *sql.DB) (*User, error) {
 		&u.Name,
 		&u.Created,
 		&u.Updated,
-		&u.Deleted,
+		&deleted,
 	)
+	if deleted.Valid {
+		u.Deleted = deleted.Time
+	}
 	if err != nil {
 		log.Println("Error SELECT in user.Show:", err)
 		return nil, err
 	}
 	// Filter only NOT Deleted User
-	if u.Deleted.Valid == true {
+	if deleted.Valid == true {
 		return nil, errors.New("User Deleted. - ผู้ใช้คนนี้ถูกลบแล้ว")
 	}
 	return u, nil
@@ -54,6 +59,7 @@ func (u *User) All(db *sql.DB) ([]*User, error) {
 	}
 	defer rows.Close()
 	var users Users
+	var updated, deleted mysql.NullTime
 	for rows.Next() {
 		// We do not save plain text password to DB, just secret.
 		var i = new(User)
@@ -61,15 +67,21 @@ func (u *User) All(db *sql.DB) ([]*User, error) {
 			&i.ID,
 			&i.Name,
 			&i.Created,
-			&i.Updated,
-			&i.Deleted,
+			&updated,
+			&deleted,
 		)
+		if updated.Valid {
+			i.Updated = updated.Time
+		}
+		if deleted.Valid {
+			i.Deleted = deleted.Time
+		}
 		if err != nil {
 			log.Println(">>> rows.Scan() Error= ", err)
 			return nil, err
 		}
 		// Filter only NOT Deleted User
-		if i.Deleted.Valid == false {
+		if deleted.Valid == false {
 			users = append(users, i)
 		}
 	}
@@ -80,13 +92,10 @@ func (u *User) All(db *sql.DB) ([]*User, error) {
 // Insert New User
 func (u *User) New(db *sql.DB) (*User, error) {
 	log.Println(">>start User.New() method")
-	datetime := time.Now()
-	datetime.Format(time.RFC3339)
 	rs, err := db.Exec(
-		"INSERT INTO user (name, secret, created) VALUES(?, ?, ?)",
+		"INSERT INTO user (name, secret) VALUES(?, ?, ?)",
 		u.Name,
 		u.Secret,
-		datetime,
 	) // no plain text u.Password save to DB
 	if err != nil {
 		log.Println(">>>Error cannot exec INSERT User: >>>", err)
@@ -137,14 +146,14 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 	log.Println("existUser: ", existUser)
 
 	var rs sql.Result
-	var updateTime = time.Now()
-	updateTime.Format(time.RFC3339) // make Time Format fit to MariaDB.DateTime
+	now := time.Now()
+	now.Format(time.RFC3339) // make Time Format fit to MariaDB.DateTime
 	//log.Println("Check: t := datetime: ", updateTime)
 	if u.Password == "" { // Check if INPUT u.password is BLANK: So, user don't need to change password
 		rs, err = db.Exec(
 			"UPDATE user SET name= ?, updated=? WHERE id=?",
 			u.Name,
-			updateTime,
+			now,
 			existUser.ID,
 		)
 	} else {
@@ -153,7 +162,7 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 			"UPDATE user SET name= ?, secret= ?, updated=? WHERE id =? ",
 			u.Name,
 			u.Secret,
-			updateTime,
+			now,
 			existUser.ID,
 		)
 	}
@@ -165,6 +174,8 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 	// db.QueryRow to check if correct update record
 	countRow, _ := rs.RowsAffected()
 	log.Println("Number of row updated: ", countRow)
+
+	var updated mysql.NullTime
 	n := User{}
 	err = db.QueryRow(
 		"SELECT id, name, secret, created, updated FROM user WHERE id =?",
@@ -174,8 +185,11 @@ func (u *User) Update(db *sql.DB) (*User, error) {
 		&n.Name,
 		&n.Secret,
 		&n.Created,
-		&n.Updated,
+		&updated,
 	)
+	if updated.Valid {
+		n.Updated = updated.Time
+	}
 	if err != nil {
 		log.Println("Error when SELECT updated row??? >>>", err)
 	}
@@ -194,7 +208,6 @@ func (u *User) SetPass() error {
 	return nil
 }
 
-
 func (u *User) VerifyPass(p string) error { // not export call from Add() or Update
 	err := bcrypt.CompareHashAndPassword(u.Secret, []byte(p))
 	if err != nil {
@@ -203,7 +216,7 @@ func (u *User) VerifyPass(p string) error { // not export call from Add() or Upd
 	return nil
 }
 
-func (u *User) FindByName(db *sql.DB) error{
+func (u *User) FindByName(db *sql.DB) error {
 	err := db.QueryRow(
 		"SELECT id, name, secret FROM user WHERE name = ?",
 		u.Name,
@@ -218,12 +231,13 @@ func (u *User) FindByName(db *sql.DB) error{
 	}
 	return nil
 }
+
 // Method models.User.Del to delete User (Later we will implement my framework just add delete DateX
 func (u *User) Del(db *sql.DB) error {
-	delTime := time.Now()
-	delTime.Format(time.RFC3339)
+	now := time.Now()
+	now.Format(time.RFC3339)
 	sql := "UPDATE user SET deleted = ? WHERE id = ?"
-	rs, err := db.Exec(sql, delTime, u.ID)
+	rs, err := db.Exec(sql, now, u.ID)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -235,17 +249,21 @@ func (u *User) Del(db *sql.DB) error {
 	log.Println("Deleted:", rowCnt, "row(s).")
 
 	// TODO return Deleted User
+	var deleted mysql.NullTime
 	err = db.QueryRow(
 		"SELECT id, name, deleted FROM user WHERE id =?",
 		u.ID,
 	).Scan(
 		&u.ID,
 		&u.Name,
-		&u.Deleted,
+		&deleted,
 	)
 	if err != nil {
 		log.Println("Error when SELECT updated row??? >>>", err)
 		return err
+	}
+	if deleted.Valid {
+		u.Deleted = deleted.Time
 	}
 	return nil
 }
@@ -264,16 +282,20 @@ func (u *User) Undel(db *sql.DB) error {
 	log.Println("Undeleted:", rowCnt, "row(s).")
 
 	// TODO return Deleted User
+	var deleted mysql.NullTime
 	err = db.QueryRow(
 		"SELECT id, name, deleted FROM user WHERE id =?",
 		u.ID,
 	).Scan(
 		&u.ID,
 		&u.Name,
-		&u.Deleted,
+		&deleted,
 	)
 	if err != nil {
 		log.Println("Error when SELECT updated row??? >>>", err)
+	}
+	if deleted.Valid {
+		u.Deleted = deleted.Time
 	}
 	return nil
 }

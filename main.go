@@ -64,17 +64,21 @@ func SetupRouter(c *controllers.Env) *mux.Router{
 	s.HandleFunc("/login", c.LoginUser).Methods("POST")
 	log.Println("/api/v1/login POST UserLogin")
 	s.HandleFunc("/{id:[0-9]+}", c.DelUser).Methods("DELETE")
-	log.Println("start '/api/v1/user/:id' DELETE UserDelete")
+	log.Println("/api/v1/user/:id DELETE UserDelete")
 	s.HandleFunc("/{id:[0-9]+}/undelete", c.UndelUser).Methods("PUT")
-	log.Println("start '/api/v1/user/:id/undelete' PUT UserUndelete")
+	log.Println("/api/v1/user/:id/undelete PUT UserUndelete")
 	// Menu
 	s = r.PathPrefix("/api/v1/menu").Subrouter()
 	s.HandleFunc("/", c.MenuAll).Methods("GET")
-	log.Println("start Router GET MenuAll")
+	log.Println("/api/v1/menu GET AllMenu")
 	s.HandleFunc("/", c.MenuInsert).Methods("POST")
-	log.Println("start Router POST MenuNew")
+	log.Println("/api/v1/menu POST NewMenu")
 	s.HandleFunc("/tree", c.MenuTree).Methods("GET")
-	log.Println("start Router GET MenuTree")
+	log.Println("/api/v1/menu/tree GET TreeMenu")
+	// Person
+	s = r.PathPrefix("/api/v1/person").Subrouter()
+	s.HandleFunc("/", c.NewPerson).Methods("POST")
+	log.Println("/api/v1/person POST NewPerson")
 
 	return r
 }

@@ -81,7 +81,7 @@ func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (e *Env) AllUser(w http.ResponseWriter, r *http.Request) {
-	log.Println("call GET UserIndex()")
+	log.Println("call GET All User()")
 	if r.Method != "GET" {
 		http.Error(w, http.StatusText(500), 500)
 		return

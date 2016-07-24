@@ -1,16 +1,16 @@
 package models
 
 import (
-	"github.com/go-sql-driver/mysql"
+	"time"
 )
 
 // Base structure contains fields that are common to objects
 // returned by the nava's REST API.
 type Base struct {
 	ID      uint64         `json:"id"`
-	Created mysql.NullTime `json:"created"` //todo: change datatype to sql.NullTime
-	Updated mysql.NullTime `json:"updated"`
-	Deleted mysql.NullTime `json:"deleted"`
+	Created time.Time `json:"created"`
+	Updated time.Time `json:"updated"`
+	Deleted time.Time `json:"deleted"`
 }
 
 //func (b *Base) Delete(db *sql.DB) error {

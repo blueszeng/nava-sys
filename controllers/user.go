@@ -3,11 +3,12 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/mrtomyum/nava-api3/models"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
+	"github.com/mrtomyum/nava-api3/models"
 	"github.com/mrtomyum/nava-api3/api"
 )
 

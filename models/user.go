@@ -8,6 +8,7 @@ import (
 	"log"
 	"strings"
 	"time"
+	"github.com/jmoiron/sqlx"
 )
 
 type User struct {
@@ -19,7 +20,7 @@ type User struct {
 
 type Users []*User
 
-func (u *User) Show(db *sql.DB) (*User, error) {
+func (u *User) Show(db *sqlx.DB) (*User, error) {
 	var deleted mysql.NullTime
 	err := db.QueryRow(
 		"SELECT id, name, created, updated, deleted FROM user WHERE id = ?",
@@ -45,7 +46,7 @@ func (u *User) Show(db *sql.DB) (*User, error) {
 	return u, nil
 }
 
-func (u *User) All(db *sql.DB) ([]*User, error) {
+func (u *User) All(db *sqlx.DB) ([]*User, error) {
 	log.Println(">>> start AllUsers() >> db = ", db)
 	err := db.Ping()
 	if err != nil {
@@ -90,7 +91,7 @@ func (u *User) All(db *sql.DB) ([]*User, error) {
 }
 
 // Insert New User
-func (u *User) New(db *sql.DB) (*User, error) {
+func (u *User) New(db *sqlx.DB) (*User, error) {
 	log.Println(">>start User.New() method")
 	rs, err := db.Exec(
 		"INSERT INTO user (name, secret) VALUES(?, ?, ?)",
@@ -128,7 +129,7 @@ func (u *User) New(db *sql.DB) (*User, error) {
 }
 
 // UpdateUser by id
-func (u *User) Update(db *sql.DB) (*User, error) {
+func (u *User) Update(db *sqlx.DB) (*User, error) {
 	log.Println(">>start models.user.Update() method")
 	existUser := User{}
 	err := db.QueryRow(
@@ -216,7 +217,7 @@ func (u *User) VerifyPass(p string) error { // not export call from Add() or Upd
 	return nil
 }
 
-func (u *User) FindByName(db *sql.DB) error {
+func (u *User) FindByName(db *sqlx.DB) error {
 	err := db.QueryRow(
 		"SELECT id, name, secret FROM user WHERE name = ?",
 		u.Name,
@@ -233,7 +234,7 @@ func (u *User) FindByName(db *sql.DB) error {
 }
 
 // Method models.User.Del to delete User (Later we will implement my framework just add delete DateX
-func (u *User) Del(db *sql.DB) error {
+func (u *User) Del(db *sqlx.DB) error {
 	now := time.Now()
 	now.Format(time.RFC3339)
 	sql := "UPDATE user SET deleted = ? WHERE id = ?"
@@ -268,7 +269,7 @@ func (u *User) Del(db *sql.DB) error {
 	return nil
 }
 
-func (u *User) Undel(db *sql.DB) error {
+func (u *User) Undel(db *sqlx.DB) error {
 	sql := "UPDATE user SET deleted = ? WHERE id = ?"
 	rs, err := db.Exec(sql, nil, u.ID)
 	if err != nil {
@@ -301,7 +302,7 @@ func (u *User) Undel(db *sql.DB) error {
 }
 
 // function models.User.SearchUsers() here!
-func SearchUsers(db *sql.DB, s string) (Users, error) {
+func SearchUsers(db *sqlx.DB, s string) (Users, error) {
 	s = "%" + strings.ToLower(s) + "%"
 	stmt, err := db.Prepare("SELECT id, name FROM user WHERE LOWER(name) LIKE ?")
 	if err != nil {

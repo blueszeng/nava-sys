@@ -1,8 +1,8 @@
 package models
 
 import (
-	"database/sql"
 	"log"
+	"github.com/jmoiron/sqlx"
 )
 
 type Menu struct {
@@ -17,7 +17,7 @@ type Menu struct {
 type Menus []*Menu
 
 
-func (m *Menu) All(db *sql.DB) ([]*Menu, error) {
+func (m *Menu) All(db *sqlx.DB) ([]*Menu, error) {
 	rows, err := db.Query("SELECT id, parent_id, name, code, path, note FROM menu")
 	if err != nil {
 		log.Println(">>> 1. db.Query Error= ", err)
@@ -46,7 +46,7 @@ func (m *Menu) All(db *sql.DB) ([]*Menu, error) {
 	return menus, nil
 }
 
-func (m *Menu) Insert(db *sql.DB) error {
+func (m *Menu) Insert(db *sqlx.DB) error {
 	log.Println("Start m.New()")
 	sql := "INSERT INTO menu (parent_id, name, code, path, note ) VALUES(?,?,?,?,?)"
 

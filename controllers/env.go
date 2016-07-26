@@ -1,7 +1,9 @@
 package controllers
 
-import "database/sql"
+import (
+	"github.com/jmoiron/sqlx"
+)
 
 type Env struct {
-	DB *sql.DB
+	DB *sqlx.DB
 }

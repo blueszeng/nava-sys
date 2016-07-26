@@ -5,7 +5,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/mrtomyum/nava-api3/controllers"
 	"github.com/mrtomyum/nava-api3/models"
-	"github.com/jmoiron/sqlx"
 	"log"
 	"net/http"
 	"os"

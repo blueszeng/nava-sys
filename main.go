@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/mrtomyum/nava-api3/controllers"
 	"github.com/mrtomyum/nava-api3/models"
+	"github.com/jmoiron/sqlx"
 	"log"
 	"net/http"
 	"os"
@@ -36,6 +37,7 @@ func main() {
 	if err != nil {
 		log.Panic("NewDB() Error:", err)
 	}
+
 	c := &controllers.Env{DB: db}
 	defer db.Close()
 
@@ -77,6 +79,8 @@ func SetupRouter(c *controllers.Env) *mux.Router{
 	log.Println("/api/v1/menu/tree GET TreeMenu")
 	// Person
 	s = r.PathPrefix("/api/v1/person").Subrouter()
+	s.HandleFunc("/", c.AllPerson).Methods("GET")
+	log.Println("/api/v1/person GET AllPerson")
 	s.HandleFunc("/", c.NewPerson).Methods("POST")
 	log.Println("/api/v1/person POST NewPerson")
 

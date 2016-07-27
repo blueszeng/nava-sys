@@ -3,8 +3,8 @@ package main
 import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
-	c "github.com/mrtomyum/nava-api3/controllers"
-	"github.com/mrtomyum/nava-api3/models"
+	c "github.com/mrtomyum/nava-api3/controller"
+	m "github.com/mrtomyum/nava-api3/model"
 	"log"
 	"net/http"
 	"os"
@@ -32,7 +32,7 @@ func main() {
 	var dsn = config.DBUser + ":" + config.DBPass + "@" + config.DBHost + "/" + config.DBName + "?parseTime=true"
 
 	// Create new DB connection pool
-	db, err := models.NewDB(dsn)
+	db, err := m.NewDB(dsn)
 	if err != nil {
 		log.Panic("NewDB() Error:", err)
 	}

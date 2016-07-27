@@ -1,4 +1,4 @@
-package models
+package model
 
 func MockUser()  []*User{
 	users := []*User{

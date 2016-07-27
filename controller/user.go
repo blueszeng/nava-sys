@@ -1,4 +1,4 @@
-package controllers
+package controller
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/mrtomyum/nava-api3/models"
+	m "github.com/mrtomyum/nava-api3/model"
 	"github.com/mrtomyum/nava-api3/api"
 )
 
@@ -22,7 +22,7 @@ func (e Env) ShowUser(w http.ResponseWriter, r *http.Request) {
 	}
 	v := mux.Vars(r)
 	id := v["id"]
-	u := new(models.User)
+	u := new(m.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
 	log.Println("Print u.ID", id)
 
@@ -51,7 +51,7 @@ func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u := new(models.User)
+	u := new(m.User)
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&u)
 	if err != nil {
@@ -87,7 +87,7 @@ func (e *Env) AllUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u := models.User{}
+	u := m.User{}
 	users, err := u.All(e.DB)
 	rs := api.Response{}
 	if err != nil {
@@ -115,7 +115,7 @@ func (e *Env) NewUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u := models.User{}
+	u := m.User{}
 	// retrieve JSON from body request to decoder and decode it to memory address of User{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&u)
@@ -130,7 +130,7 @@ func (e *Env) NewUser(w http.ResponseWriter, r *http.Request) {
 	} else {
 		log.Println("Success u.SetPass()")
 	}
-	// call u.New() method from models/user
+	// call u.New() method from m/user
 	newUser, err := u.New(e.DB)
 	rs := api.Response{}
 	if err != nil {
@@ -156,7 +156,7 @@ func (e Env) DelUser(w http.ResponseWriter, r *http.Request){
 
 	v := mux.Vars(r)
 	id := v["id"]
-	u := new(models.User)
+	u := new(m.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
 
 	err := u.Del(e.DB)
@@ -181,7 +181,7 @@ func (e Env) UndelUser(w http.ResponseWriter, r *http.Request) {
 	}
 	v := mux.Vars(r)
 	id := v["id"]
-	u := new(models.User)
+	u := new(m.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
 
 	err := u.Undel(e.DB)
@@ -208,7 +208,7 @@ func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u := models.User{}
+	u := m.User{}
 	decode := json.NewDecoder(r.Body)
 	err := decode.Decode(&u)
 	if err != nil {
@@ -258,7 +258,7 @@ func (e Env) SearchUser(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("Success decode JSON -> :", s)
 
-	users, err := models.SearchUsers(e.DB, s.Name)
+	users, err := m.SearchUsers(e.DB, s.Name)
 	if err != nil {
 		log.Println("Error in Query:", err)
 	}

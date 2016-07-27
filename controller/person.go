@@ -1,11 +1,11 @@
-package controllers
+package controller
 
 import (
 	"net/http"
 	"fmt"
 	"log"
 	"encoding/json"
-	"github.com/mrtomyum/nava-api3/models"
+	m "github.com/mrtomyum/nava-api3/model"
 	"github.com/mrtomyum/nava-api3/api"
 )
 
@@ -15,7 +15,7 @@ func (e *Env) NewPerson(w http.ResponseWriter, r *http.Request) {
 	//	http.Error(w, http.StatusText(500), 500)
 	//	return
 	//}
-	p := models.Person{}
+	p := m.Person{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&p)
 	if err != nil {
@@ -37,7 +37,7 @@ func (e *Env) NewPerson(w http.ResponseWriter, r *http.Request) {
 
 func (e *Env) AllPerson(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET All Person()")
-	p := models.Person{}
+	p := m.Person{}
 	persons, err := p.All(e.DB)
 	if err != nil {
 		log.Println("Error after call p.All():", err)

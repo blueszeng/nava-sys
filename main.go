@@ -3,7 +3,7 @@ package main
 import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
-	"github.com/mrtomyum/nava-api3/controllers"
+	c "github.com/mrtomyum/nava-api3/controllers"
 	"github.com/mrtomyum/nava-api3/models"
 	"log"
 	"net/http"
@@ -37,7 +37,7 @@ func main() {
 		log.Panic("NewDB() Error:", err)
 	}
 
-	c := &controllers.Env{DB: db}
+	c := &c.Env{DB: db}
 	defer db.Close()
 
 	r := SetupRouter(c)
@@ -46,7 +46,7 @@ func main() {
 	http.ListenAndServe(":8000", nil)
 }
 
-func SetupRouter(c *controllers.Env) *mux.Router{
+func SetupRouter(c *c.Env) *mux.Router{
 	// แก้ปัญหา"/" ปิดท้าย URI แล้ว 404 page not found
 	// .StrictSlash(true) help ignore last "/" in URI
 	r := mux.NewRouter().StrictSlash(true)

@@ -1,7 +1,6 @@
 package models
 
 import (
-	"database/sql"
 	"github.com/go-sql-driver/mysql"
 	"log"
 	"time"
@@ -12,7 +11,7 @@ type Person struct {
 	Base
 	First     string    `json:"first"`
 	Last      string    `json:"last"`
-	Nick      sql.NullString    `json:"nick"`
+	Nick      JsonNullString    `json:"nick"`
 	Sex       string    `json:"sex"`
 	BirthDate time.Time `json:"birth_date"`
 }

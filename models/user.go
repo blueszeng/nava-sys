@@ -21,7 +21,7 @@ type User struct {
 type Users []*User
 
 func (u *User) Show(db *sqlx.DB) (*User, error) {
-	var deleted mysql.NullTime
+	var updated, deleted mysql.NullTime
 	err := db.QueryRow(
 		"SELECT id, name, created, updated, deleted FROM user WHERE id = ?",
 		u.ID,
@@ -29,9 +29,12 @@ func (u *User) Show(db *sqlx.DB) (*User, error) {
 		&u.ID,
 		&u.Name,
 		&u.Created,
-		&u.Updated,
+		&updated,
 		&deleted,
 	)
+	if updated.Valid {
+		u.Updated = updated.Time
+	}
 	if deleted.Valid {
 		u.Deleted = deleted.Time
 	}

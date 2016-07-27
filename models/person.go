@@ -9,10 +9,10 @@ import (
 
 type Person struct {
 	Base
-	First     string    `json:"first"`
-	Last      string    `json:"last"`
+	First     JsonNullString    `json:"first"`
+	Last      JsonNullString    `json:"last"`
 	Nick      JsonNullString    `json:"nick"`
-	Sex       string    `json:"sex"`
+	Sex       JsonNullString    `json:"sex"`
 	BirthDate time.Time `json:"birth_date"`
 }
 

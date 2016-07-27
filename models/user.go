@@ -97,7 +97,7 @@ func (u *User) All(db *sqlx.DB) ([]*User, error) {
 func (u *User) New(db *sqlx.DB) (*User, error) {
 	log.Println(">>start User.New() method")
 	rs, err := db.Exec(
-		"INSERT INTO user (name, secret) VALUES(?, ?, ?)",
+		"INSERT INTO user (name, secret) VALUES(?, ?)",
 		u.Name,
 		u.Secret,
 	) // no plain text u.Password save to DB

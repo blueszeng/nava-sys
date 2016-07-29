@@ -46,23 +46,29 @@ func (e *Env) MenuTree(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(500), 500)
 		return
 	}
-
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
 	menu := new(m.Menu)
-	menus, _ := menu.All(e.DB)
-	//if err != nil {
-	//	log.Println("Error in m.Menu.All: ", err)
-	//}
+	menus, err := menu.All(e.DB)
+	if err != nil {
+		log.Println("Error in m.Menu.All: ", err)
+	}
 
 	jsonNode := new(m.Node)
 	for _, menu := range menus{
 		n := new(m.Node)
 		n.ID = menu.ID
 		n.ParentID = menu.ParentID
-		n.Text = menu.Name
+		n.Text = menu.Text
+		n.Icon = menu.Icon
+		n.SelectedIcon = menu.SelectedIcon
 		n.Path = menu.Path
 		n.Note = menu.Note
+		log.Println("n=", n)
+		log.Println("menu=", menu)
 		jsonNode.Add(n)
 	}
+	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(jsonNode)
 	fmt.Fprintf(w, string(output))
 }

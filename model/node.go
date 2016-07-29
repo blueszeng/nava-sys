@@ -5,31 +5,34 @@ type Node struct {
 	ParentID int     `json:"-"`
 	Text     string  `json:"text"`
 	Icon     string  `json:"icon"`
-	Path     string  `json:"href"`
-	Note     string  `json:"note"`
+	SelectedIcon string `json:"selectedIcon"`
+	Href string `json:"href"`
+	Path     string  `json:"-"`
+	Note     string  `json:"-"`
 	Child    []*Node `json:"nodes,omitempty"`
 }
 
-func (n *Node) Size() int {
-	var size int = len(n.Child)
-	for _, c := range n.Child {
+
+func (this *Node) Size() int {
+	var size int = len(this.Child)
+	for _, c := range this.Child {
 		size += c.Size()
 	}
 	return size
 }
 
-func (n *Node) Add(nodes ...*Node) bool {
-	var size = n.Size()
-	for _, n := range nodes {
-		if n.ParentID == n.ID {
-			n.Child = append(n.Child, n)
+func (this *Node) Add(nodes ...*Node) bool {
+	var size = this.Size()
+	for _, node := range nodes {
+		if node.ParentID == this.ID {
+			this.Child = append(this.Child, node)
 		} else {
-			for _, c := range n.Child {
-				if c.Add(n) {
+			for _, c := range this.Child {
+				if c.Add(node) {
 					break
 				}
 			}
 		}
 	}
-	return n.Size() == size+len(nodes)
+	return this.Size() == size+len(nodes)
 }

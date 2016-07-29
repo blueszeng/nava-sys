@@ -15,11 +15,14 @@ import (
 // Method UserShow to query 1 row of user match u.id
 func (e Env) ShowUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserShow()")
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
 
-	if r.Method != "GET" {
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
+	//
+	//if r.Method != "GET" {
+	//	http.Error(w, http.StatusText(500), 500)
+	//	return
+	//}
 	v := mux.Vars(r)
 	id := v["id"]
 	u := new(m.User)
@@ -37,14 +40,16 @@ func (e Env) ShowUser(w http.ResponseWriter, r *http.Request) {
 		rs.Message = "OK"
 		rs.Result = user
 	}
+	w.WriteHeader(http.StatusOK)
 	o, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s", string(o))
-	//TODO: Add Header content-type: application/json
 }
 
 func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call PUT UserUpdate()")
 	log.Println("Request Body:", r.Body)
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
 
 	if r.Method != "PUT" {
 		http.Error(w, http.StatusText(500), 500)
@@ -76,16 +81,20 @@ func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		rs.Message = "Update OK"
 		rs.Result = updateUser
 	}
+	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s", string(output))
 }
 
 func (e *Env) AllUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET All User()")
-	if r.Method != "GET" {
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
+	//if r.Method != "GET" {
+	//	http.Error(w, http.StatusText(500), 500)
+	//	return
+	//}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
+
 
 	u := m.User{}
 	users, err := u.All(e.DB)
@@ -142,6 +151,7 @@ func (e *Env) NewUser(w http.ResponseWriter, r *http.Request) {
 		rs.Message = "CREATED"
 		rs.Result = newUser
 	}
+	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s" ,string(output))
 }
@@ -194,6 +204,7 @@ func (e Env) UndelUser(w http.ResponseWriter, r *http.Request) {
 		rs.Message = "UNDELETED OK"
 		rs.Result = u
 	}
+	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s",string(output))
 
@@ -235,6 +246,7 @@ func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 		rs.Status = "200"
 		rs.Message = "LOGIN SUCCESS"
 	}
+	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s", string(output))
 }

@@ -30,9 +30,16 @@ type Org struct {
 
 func (p *Person) New(db *sqlx.DB) error {
 	log.Println("run models.Person.New method from:", p)
+
 	birthDate := p.BirthDate.Format(time.RFC3339)
-	sql := `INSERT INTO person (first, last, nick, sex, birth_date)
-		VALUES (?,?,?,?,?)`
+	sql := `INSERT INTO person (
+		first,
+		last,
+		nick,
+		sex,
+		birth_date
+	)
+	VALUES (?,?,?,?,?)`
 	res, err := db.Exec(sql,
 		p.First,
 		p.Last,

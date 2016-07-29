@@ -11,6 +11,9 @@ import (
 
 func (e *Env) NewPerson(w http.ResponseWriter, r *http.Request) {
 	log.Println("call POST New Person()")
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
+
 	//if r.Method != "POST" {
 	//	http.Error(w, http.StatusText(500), 500)
 	//	return
@@ -31,6 +34,7 @@ func (e *Env) NewPerson(w http.ResponseWriter, r *http.Request) {
 		rs.Message = "NEW PERSON CREATED"
 		rs.Result = p
 	}
+	w.WriteHeader(http.StatusOK)
 	o, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s", string(o))
 }
@@ -52,6 +56,7 @@ func (e *Env) AllPerson(w http.ResponseWriter, r *http.Request) {
 		rs.Message = "OK"
 		rs.Result = persons
 	}
+	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s", string(output))
 }

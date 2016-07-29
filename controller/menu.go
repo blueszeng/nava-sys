@@ -9,13 +9,16 @@ import (
 )
 
 func (e *Env) MenuAll(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
 
-	if r.Method != "GET" {
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
 	m := new(m.Menu)
 	menus, err := m.All(e.DB)
+	if err != nil {
+		log.Println("Error m.All():", err)
+		w.WriteHeader(http.StatusNotFound)
+	}
+	w.WriteHeader(http.StatusOK)
 	output, err := json.Marshal(menus)
 	if err != nil {
 		log.Println("Error json.Marshal:", err)
@@ -24,9 +27,9 @@ func (e *Env) MenuAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (e *Env) MenuInsert(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, http.StatusText(500), 500)
-	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
+
 	m := m.Menu{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&m)
@@ -36,7 +39,10 @@ func (e *Env) MenuInsert(w http.ResponseWriter, r *http.Request) {
 	err = m.Insert(e.DB)
 	if err != nil {
 		fmt.Println("Error Insert DB:", err)
+		w.WriteHeader(http.StatusNotImplemented)
+
 	}
+	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(&m)
 	fmt.Fprintf(w, string(output))
 }

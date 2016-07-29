@@ -71,7 +71,6 @@ func (e *Env) MenuTree(w http.ResponseWriter, r *http.Request) {
 		n.Path = menu.Path
 		n.Note = menu.Note
 		log.Println("n=", n)
-		log.Println("menu=", menu)
 		jsonNode.Add(n)
 	}
 	w.WriteHeader(http.StatusOK)

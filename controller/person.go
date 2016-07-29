@@ -41,6 +41,9 @@ func (e *Env) NewPerson(w http.ResponseWriter, r *http.Request) {
 
 func (e *Env) AllPerson(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET All Person()")
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
+
 	p := m.Person{}
 	persons, err := p.All(e.DB)
 	if err != nil {

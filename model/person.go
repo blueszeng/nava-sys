@@ -75,9 +75,10 @@ func (p *Person) New(db *sqlx.DB) error {
 
 func (p *Person) All(db *sqlx.DB) ([]*Person, error) {
 	log.Println("run models.Person.All method from:", p)
-	sql := `SELECT id, created, updated, deleted,
-		first, last, nick, sex, birth_date
-		FROM person`
+	//sql := `SELECT id, created, updated, deleted,
+	//	first, last, nick, sex, birth_date
+	//	FROM person`
+	sql := `SELECT * FROM person`
 	rows, err := db.Query(sql)
 	if err != nil {
 		log.Println(">>> db.Query Error= ", err)
@@ -89,35 +90,36 @@ func (p *Person) All(db *sqlx.DB) ([]*Person, error) {
 		//nick                        sql.NullString
 		updated, deleted, birthDate mysql.NullTime
 	)
-
+	person := new(Person)
 	for rows.Next() {
 		err := rows.Scan(
-			&p.ID,
-			&p.Created,
+			&person.ID,
+			&person.Created,
 			&updated,
 			&deleted,
-			&p.First,
-			&p.Last,
-			&p.Nick,
-			&p.Sex,
+			&person.First,
+			&person.Last,
+			&person.Nick,
+			&person.Sex,
 			&birthDate,
 		)
 		if updated.Valid {
-			p.Updated = updated.Time
+			person.Updated = updated.Time
 		}
 		if deleted.Valid {
-			p.Deleted = deleted.Time
+			person.Deleted = deleted.Time
 		}
 		//if nick.Valid {
 		//	p.Nick = nick.String
 		//}
 		if birthDate.Valid {
-			p.BirthDate = birthDate.Time
+			person.BirthDate = birthDate.Time
 		}
 		if err != nil {
 			log.Println("Error in rows.Scan():", err)
 		}
-		persons = append(persons, p)
+		persons = append(persons, person)
+		log.Println(persons)
 	}
 	return persons, nil
 }

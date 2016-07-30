@@ -60,9 +60,8 @@ func (e *Env) MenuTree(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error in m.Menu.All: ", err)
 	}
 
-	jsonNode := new(m.Node)
+	n := new(m.Node)
 	for _, menu := range menus{
-		n := new(m.Node)
 		n.ID = menu.ID
 		n.ParentID = menu.ParentID
 		n.Text = menu.Text
@@ -70,10 +69,10 @@ func (e *Env) MenuTree(w http.ResponseWriter, r *http.Request) {
 		n.SelectedIcon = menu.SelectedIcon
 		n.Path = menu.Path
 		n.Note = menu.Note
+		n.Add(n)
 		log.Println("n=", n)
-		jsonNode.Add(n)
 	}
 	w.WriteHeader(http.StatusOK)
-	output, _ := json.Marshal(jsonNode)
+	output, _ := json.Marshal(n)
 	fmt.Fprintf(w, string(output))
 }

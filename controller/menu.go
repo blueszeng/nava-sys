@@ -59,20 +59,31 @@ func (e *Env) MenuTree(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error in m.Menu.All: ", err)
 	}
-
-	n := new(m.Node)
-	for _, menu := range menus{
-		n.ID = menu.ID
-		n.ParentID = menu.ParentID
-		n.Text = menu.Text
-		n.Icon = menu.Icon
-		n.SelectedIcon = menu.SelectedIcon
-		n.Path = menu.Path
-		n.Note = menu.Note
-		n.Add(n)
-		log.Println("n=", n)
+	// Setup root node
+	jsonNode := new(m.Node)
+	jsonNode.ID = menus[0].ID
+	jsonNode.ParentID = menus[0].ParentID
+	jsonNode.Text = menus[0].Text
+	jsonNode.Icon = menus[0].Icon
+	jsonNode.SelectedIcon = menus[0].SelectedIcon
+	jsonNode.Path = menus[0].Path
+	jsonNode.Note = menus[0].Note
+	// Adding child node
+	for k, menu := range menus{
+		n := new(m.Node)
+		if k != 0 {
+			n.ID = menu.ID
+			n.ParentID = menu.ParentID
+			n.Text = menu.Text
+			n.Icon = menu.Icon
+			n.SelectedIcon = menu.SelectedIcon
+			n.Path = menu.Path
+			n.Note = menu.Note
+			log.Println("n=", n)
+			jsonNode.Add(n)
+		}
 	}
 	w.WriteHeader(http.StatusOK)
-	output, _ := json.Marshal(n)
+	output, _ := json.Marshal(jsonNode)
 	fmt.Fprintf(w, string(output))
 }

@@ -4,15 +4,17 @@ import (
 	"time"
 	"encoding/json"
 	"database/sql"
+	"github.com/go-sql-driver/mysql"
 )
 
 // Base structure contains fields that are common to objects
 // returned by the nava's REST API.
 type Base struct {
 	ID      uint64         `json:"id"`
-	Created time.Time `json:"created"`
-	Updated time.Time `json:"updated"`
-	Deleted time.Time `json:"deleted"`
+	// Todo: Cheange datetype time.Time -> JsonNullTime
+	Created JsonNullTime `json:"created"`
+	Updated JsonNullTime `json:"updated"`
+	Deleted JsonNullTime `json:"deleted"`
 }
 
 //func (b *Base) Delete(db *sql.DB) error {
@@ -56,3 +58,28 @@ func (v JsonNullString) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type JsonNullTime struct {
+	mysql.NullTime
+}
+
+func (v JsonNullTime) MarshalJSON() ([]byte, error) {
+	if v.Valid {
+		return json.Marshal(v.Time)
+	} else {
+		return json.Marshal(nil)
+	}
+}
+
+func (v JsonNullTime) UnmarshalJSON(data []byte) error {
+	var x *time.Time
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	if x != nil {
+		v.Valid = true
+		v.Time = *x
+	} else {
+		v.Valid = false
+	}
+	return nil
+}

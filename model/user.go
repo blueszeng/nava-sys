@@ -21,29 +21,31 @@ type User struct {
 type Users []*User
 
 func (u *User) Show(db *sqlx.DB) (*User, error) {
-	var updated, deleted mysql.NullTime
-	err := db.QueryRow(
+	//var updated, deleted mysql.NullTime
+	err := db.QueryRowx(
 		"SELECT id, name, created, updated, deleted FROM user WHERE id = ?",
 		u.ID,
-	).Scan(
-		&u.ID,
-		&u.Name,
-		&u.Created,
-		&updated,
-		&deleted,
-	)
-	if updated.Valid {
-		u.Updated = updated.Time
-	}
-	if deleted.Valid {
-		u.Deleted = deleted.Time
-	}
+	).StructScan(&u)
+	//).Scan(
+	//	&u.ID,
+	//	&u.Name,
+	//	&u.Created,
+	//	&updated,
+	//	&deleted,
+	//)
+	//if updated.Valid {
+	//	u.Updated = updated.Time
+	//}
+	//if deleted.Valid {
+	//	u.Deleted = deleted.Time
+	//}
 	if err != nil {
 		log.Println("Error SELECT in user.Show:", err)
 		return nil, err
 	}
 	// Filter only NOT Deleted User
-	if deleted.Valid == true {
+	//if deleted.Valid == true {
+	if u.Deleted.Valid == true {
 		return nil, errors.New("User Deleted. - ผู้ใช้คนนี้ถูกลบแล้ว")
 	}
 	return u, nil
@@ -55,7 +57,7 @@ func (u *User) All(db *sqlx.DB) ([]*User, error) {
 	if err != nil {
 		log.Println("Ping Error", err)
 	}
-	rows, err := db.Query(
+	rows, err := db.Queryx(
 		"SELECT id, name, created, updated, deleted FROM user")
 	if err != nil {
 		log.Println(">>> db.Query Error= ", err)
@@ -63,29 +65,30 @@ func (u *User) All(db *sqlx.DB) ([]*User, error) {
 	}
 	defer rows.Close()
 	var users Users
-	var updated, deleted mysql.NullTime
+	//var updated, deleted mysql.NullTime
 	for rows.Next() {
 		// We do not save plain text password to DB, just secret.
 		var i = new(User)
-		err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Created,
-			&updated,
-			&deleted,
-		)
-		if updated.Valid {
-			i.Updated = updated.Time
-		}
-		if deleted.Valid {
-			i.Deleted = deleted.Time
-		}
+		err := rows.StructScan(&i)
+		//err := rows.Scan(
+		//	&i.ID,
+		//	&i.Name,
+		//	&i.Created,
+		//	&updated,
+		//	&deleted,
+		//)
+		//if updated.Valid {
+		//	i.Updated = updated.Time
+		//}
+		//if deleted.Valid {
+		//	i.Deleted = deleted.Time
+		//}
 		if err != nil {
 			log.Println(">>> rows.Scan() Error= ", err)
 			return nil, err
 		}
 		// Filter only NOT Deleted User
-		if deleted.Valid == false {
+		if i.Deleted.Valid == false {
 			users = append(users, i)
 		}
 	}
@@ -181,7 +184,7 @@ func (u *User) Update(db *sqlx.DB) (*User, error) {
 
 	var updated mysql.NullTime
 	n := User{}
-	err = db.QueryRow(
+	err = db.QueryRowx(
 		"SELECT id, name, secret, created, updated FROM user WHERE id =?",
 		existUser.ID,
 	).Scan(
@@ -191,9 +194,9 @@ func (u *User) Update(db *sqlx.DB) (*User, error) {
 		&n.Created,
 		&updated,
 	)
-	if updated.Valid {
-		n.Updated = updated.Time
-	}
+	//if updated.Valid {
+	//	n.Updated = updated.Time
+	//}
 	if err != nil {
 		log.Println("Error when SELECT updated row??? >>>", err)
 	}
@@ -266,9 +269,9 @@ func (u *User) Del(db *sqlx.DB) error {
 		log.Println("Error when SELECT updated row??? >>>", err)
 		return err
 	}
-	if deleted.Valid {
-		u.Deleted = deleted.Time
-	}
+	//if deleted.Valid {
+	//	u.Deleted = deleted.Time
+	//}
 	return nil
 }
 
@@ -286,21 +289,21 @@ func (u *User) Undel(db *sqlx.DB) error {
 	log.Println("Undeleted:", rowCnt, "row(s).")
 
 	// TODO return Deleted User
-	var deleted mysql.NullTime
+	//var deleted mysql.NullTime
 	err = db.QueryRow(
 		"SELECT id, name, deleted FROM user WHERE id =?",
 		u.ID,
 	).Scan(
 		&u.ID,
 		&u.Name,
-		&deleted,
+		&u.Deleted,
 	)
 	if err != nil {
 		log.Println("Error when SELECT updated row??? >>>", err)
 	}
-	if deleted.Valid {
-		u.Deleted = deleted.Time
-	}
+	//if deleted.Valid {
+	//	u.Deleted = deleted.Time
+	//}
 	return nil
 }
 

@@ -82,6 +82,8 @@ func SetupRouter(c *c.Env) *mux.Router{
 	log.Println("/api/v1/person GET AllPerson")
 	s.HandleFunc("/", c.NewPerson).Methods("POST")
 	log.Println("/api/v1/person POST NewPerson")
+	s.HandleFunc("/{id:[0-9]+}", c.ShowPerson).Methods("GET")
+	log.Println("/api/v1/person/:id GET ShowPerson")
 
 	return r
 }

@@ -13,7 +13,7 @@ type Person struct {
 	Last      JsonNullString    `json:"last"`
 	Nick      JsonNullString    `json:"nick"`
 	Sex       JsonNullString    `json:"sex"`
-	BirthDate time.Time `json:"birth_date"`
+	BirthDate time.Time `json:"birth_date" db:"birth_date"`
 }
 
 type Job struct {
@@ -79,7 +79,7 @@ func (p *Person) All(db *sqlx.DB) ([]*Person, error) {
 	//	first, last, nick, sex, birth_date
 	//	FROM person`
 	sql := `SELECT * FROM person`
-	rows, err := db.Query(sql)
+	rows, err := db.Queryx(sql)
 	if err != nil {
 		log.Println(">>> db.Query Error= ", err)
 		return nil, err
@@ -88,33 +88,34 @@ func (p *Person) All(db *sqlx.DB) ([]*Person, error) {
 	var (
 		persons                     []*Person
 		//nick                        sql.NullString
-		updated, deleted, birthDate mysql.NullTime
+		//updated, deleted, birthDate mysql.NullTime
 	)
 	person := new(Person)
 	for rows.Next() {
-		err := rows.Scan(
-			&person.ID,
-			&person.Created,
-			&updated,
-			&deleted,
-			&person.First,
-			&person.Last,
-			&person.Nick,
-			&person.Sex,
-			&birthDate,
-		)
-		if updated.Valid {
-			person.Updated = updated.Time
-		}
-		if deleted.Valid {
-			person.Deleted = deleted.Time
-		}
-		//if nick.Valid {
-		//	p.Nick = nick.String
+		err := rows.StructScan(&person)
+		//err := rows.Scan(
+		//	&person.ID,
+		//	&person.Created,
+		//	&updated,
+		//	&deleted,
+		//	&person.First,
+		//	&person.Last,
+		//	&person.Nick,
+		//	&person.Sex,
+		//	&birthDate,
+		//)
+		//if updated.Valid {
+		//	person.Updated = updated.Time
 		//}
-		if birthDate.Valid {
-			person.BirthDate = birthDate.Time
-		}
+		//if deleted.Valid {
+		//	person.Deleted = deleted.Time
+		//}
+		////if nick.Valid {
+		////	p.Nick = nick.String
+		////}
+		//if birthDate.Valid {
+		//	person.BirthDate = birthDate.Time
+		//}
 		if err != nil {
 			log.Println("Error in rows.Scan():", err)
 		}
@@ -122,4 +123,20 @@ func (p *Person) All(db *sqlx.DB) ([]*Person, error) {
 		log.Println(persons)
 	}
 	return persons, nil
+}
+
+func (p *Person) Show(db *sqlx.DB) (Person, error) {
+	log.Println("run Show method")
+	var person Person
+	sql := `
+		SELECT * FROM person WHERE id = ?
+	`
+	err := db.QueryRowx(sql, p.ID).StructScan(&person)
+	log.Println("p=", p)
+	if err != nil {
+		log.Println("Error SELECT in user.Show:", err)
+		return person, err
+	}
+
+	return person, nil
 }

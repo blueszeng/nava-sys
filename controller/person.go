@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	m "github.com/mrtomyum/nava-api3/model"
 	"github.com/mrtomyum/nava-api3/api"
+	"github.com/gorilla/mux"
+	"strconv"
 )
 
 func (e *Env) NewPerson(w http.ResponseWriter, r *http.Request) {
@@ -64,3 +66,30 @@ func (e *Env) AllPerson(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", string(output))
 }
 
+func (e *Env) ShowPerson(w http.ResponseWriter, r *http.Request) {
+	log.Println("call GET Show Person(:id)")
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
+
+	v := mux.Vars(r)
+	id := v["id"]
+	p := m.Person{}
+	p.ID, _ = strconv.ParseUint(id, 10, 64)
+
+	person, err := p.Show(e.DB)
+	if err != nil {
+		log.Println("Error after call p.All():", err)
+	}
+	rs := api.Response{}
+	if err != nil {
+		rs.Status = "204"
+		rs.Message = "No Content: " + err.Error()
+	} else {
+		rs.Status = "200"
+		rs.Message = "OK"
+		rs.Result = person
+	}
+	w.WriteHeader(http.StatusOK)
+	output, _ := json.Marshal(rs)
+	fmt.Fprintf(w, "%s", string(output))
+}

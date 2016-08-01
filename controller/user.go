@@ -115,6 +115,9 @@ func (e *Env) AllUser(w http.ResponseWriter, r *http.Request) {
 func (e *Env) NewUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call POST UserAdd()")
 	log.Println("Request Body:", r.Body)
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
+
 
 	if r.Method != "POST" {
 		http.Error(w, http.StatusText(500), 500)
@@ -160,13 +163,15 @@ func (e Env) DelUser(w http.ResponseWriter, r *http.Request){
 		http.Error(w, http.StatusText(500), 500)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
 
 	v := mux.Vars(r)
 	id := v["id"]
 	u := new(m.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
 
-	err := u.Del(e.DB)
+	u, err := u.Del(e.DB)
 	rs := api.Response{}
 	if err != nil {
 		rs.Status = "304"
@@ -176,22 +181,26 @@ func (e Env) DelUser(w http.ResponseWriter, r *http.Request){
 		rs.Message = "DELETED OK"
 		rs.Result = u
 	}
+	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s", string(output))
 }
-// TODO: UserUndelete Method
+//  User Undelete Method
 func (e Env) UndelUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserUndelete() Method:", r.Method)
 	if r.Method != "PUT" {
 		http.Error(w, http.StatusText(500), 500)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
+
 	v := mux.Vars(r)
 	id := v["id"]
 	u := new(m.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
 
-	err := u.Undel(e.DB)
+	u, err := u.Undel(e.DB)
 	rs := api.Response{}
 	if err != nil {
 		rs.Status = "304"

@@ -18,6 +18,23 @@ type Menu struct {
 
 type Menus []*Menu
 
+type Role struct {
+	Base
+	TH string
+	EN string
+}
+
+type UserRole struct {
+	UserID uint64
+	RoleID uint64
+}
+
+type RoleMenu struct {
+	Role Role
+	Menu Menu
+	CanRead bool
+	CanWrite bool
+}
 
 func (m *Menu) All(db *sqlx.DB) ([]*Menu, error) {
 	rows, err := db.Query(`
@@ -113,3 +130,4 @@ func (m *Menu) Insert(db *sqlx.DB) error {
 	log.Println("Success insert record:", m)
 	return nil
 }
+

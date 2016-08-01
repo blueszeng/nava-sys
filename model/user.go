@@ -3,7 +3,6 @@ package model
 import (
 	"database/sql"
 	"errors"
-	"github.com/go-sql-driver/mysql"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"strings"
@@ -220,14 +219,14 @@ func (u *User) FindByName(db *sqlx.DB) error {
 }
 
 // Method models.User.Del to delete User (Later we will implement my framework just add delete DateX
-func (u *User) Del(db *sqlx.DB) error {
+func (u *User) Del(db *sqlx.DB) (*User, error) {
 	now := time.Now()
 	now.Format(time.RFC3339)
 	sql := "UPDATE user SET deleted = ? WHERE id = ?"
 	rs, err := db.Exec(sql, now, u.ID)
 	if err != nil {
 		log.Println(err)
-		return err
+		return nil, err
 	}
 	rowCnt, err := rs.RowsAffected()
 	if err != nil {
@@ -235,56 +234,39 @@ func (u *User) Del(db *sqlx.DB) error {
 	}
 	log.Println("Deleted:", rowCnt, "row(s).")
 
-	// TODO return Deleted User
-	var deleted mysql.NullTime
-	err = db.QueryRow(
-		"SELECT id, name, deleted FROM user WHERE id =?",
-		u.ID,
-	).Scan(
-		&u.ID,
-		&u.Name,
-		&deleted,
-	)
+	var user User
+	sql = `SELECT * FROM user WHERE id =?`
+	err = db.Get(&user, sql, u.ID)
 	if err != nil {
 		log.Println("Error when SELECT updated row??? >>>", err)
-		return err
+		return nil, err
 	}
-	//if deleted.Valid {
-	//	u.Deleted = deleted.Time
-	//}
-	return nil
+	user.Secret = nil
+	return &user, nil
 }
 
-func (u *User) Undel(db *sqlx.DB) error {
+func (u *User) Undel(db *sqlx.DB) (*User, error) {
 	sql := "UPDATE user SET deleted = ? WHERE id = ?"
 	rs, err := db.Exec(sql, nil, u.ID)
 	if err != nil {
 		log.Println(err)
-		return err
+		return nil, err
 	}
+	log.Println("u.ID=", u.ID)
 	rowCnt, err := rs.RowsAffected()
 	if err != nil {
 		log.Println(err)
+		return nil, err
 	}
 	log.Println("Undeleted:", rowCnt, "row(s).")
-
-	// TODO return Deleted User
-	//var deleted mysql.NullTime
-	err = db.QueryRow(
-		"SELECT id, name, deleted FROM user WHERE id =?",
-		u.ID,
-	).Scan(
-		&u.ID,
-		&u.Name,
-		&u.Deleted,
-	)
+	var user User
+	sql = `SELECT * FROM user WHERE id =?`
+	err = db.Get(&user, sql, u.ID)
 	if err != nil {
 		log.Println("Error when SELECT updated row??? >>>", err)
 	}
-	//if deleted.Valid {
-	//	u.Deleted = deleted.Time
-	//}
-	return nil
+	user.Secret = nil
+	return &user, nil
 }
 
 // function models.User.SearchUsers() here!
@@ -315,4 +297,16 @@ func SearchUsers(db *sqlx.DB, s string) (Users, error) {
 	}
 	log.Println("users = ", users)
 	return users, nil
+}
+
+func (u *User) FindMenuByUser(db *sqlx.DB) error {
+	var userRoles []UserRole
+	s := `SELECT * FROM user_role WHERE user_id =?`
+	err := db.Select(&userRoles, s, u.ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// TODO: Not finished yet. Next loop userRoles to return menu tree
+	// TODO: and skip same menu
+	return nil
 }

@@ -22,31 +22,25 @@ type Users []*User
 
 func (u *User) Show(db *sqlx.DB) (User, error) {
 	//var updated, deleted mysql.NullTime
+	sql := `
+	SELECT
+		id,
+		name,
+		created,
+		updated,
+		deleted
+	FROM user
+	WHERE id = ?`
 	var user User
-	err := db.QueryRowx(
-		"SELECT id, name, created, updated, deleted FROM user WHERE id = ?",
-		u.ID,
-	).StructScan(&user)
-	//).Scan(
-	//	&u.ID,
-	//	&u.Name,
-	//	&u.Created,
-	//	&updated,
-	//	&deleted,
-	//)
-	//if updated.Valid {
-	//	u.Updated = updated.Time
-	//}
-	//if deleted.Valid {
-	//	u.Deleted = deleted.Time
-	//}
+	err := db.Get(&user, sql, u.ID)
 	if err != nil {
-		log.Println("Error SELECT in user.Show:", err)
+		log.Println("Error SELECT() in User.Show:", err)
 		return user, err
 	}
 	// Filter only NOT Deleted User
 	//if deleted.Valid == true {
-	if u.Deleted.Valid == true {
+	if user.Deleted.Valid == true {
+		user = User{}
 		return user, errors.New("User Deleted. - ผู้ใช้คนนี้ถูกลบแล้ว")
 	}
 	return user, nil
@@ -69,15 +63,15 @@ func (u *User) All(db *sqlx.DB) ([]*User, error) {
 	defer rows.Close()
 	for rows.Next() {
 		// We do not save plain text password to DB, just secret.
-		//var i = new(User)
-		err := rows.StructScan(&u)
+		var i = new(User)
+		err := rows.StructScan(&i)
 		if err != nil {
 			log.Println(">>> rows.Scan() Error= ", err)
 			return nil, err
 		}
 		// Filter Deleted User
-		if u.Deleted.Valid == false {
-			users = append(users, u)
+		if i.Deleted.Valid == false {
+			users = append(users, i)
 		}
 	}
 	log.Println("return users", users)
@@ -125,36 +119,43 @@ func (u *User) New(db *sqlx.DB) (*User, error) {
 // UpdateUser by id
 func (u *User) Update(db *sqlx.DB) (*User, error) {
 	log.Println(">>start models.user.Update() method")
+
 	existUser := User{}
-	err := db.QueryRow(
-		"SELECT id, name FROM user WHERE id = ?",
-		u.ID,
-	).Scan(
-		&existUser.ID,
-		&existUser.Name,
-	)
+	s := `SELECT *
+		FROM user
+		WHERE id = ?`
+	err := db.Get(&existUser, s, u.ID)
 	if err != nil {
 		log.Println("Error db.QueryRow in user.Update()", err)
 		return nil, err
 	}
-	//defer db.Close()
+	if existUser.Deleted.Valid == true {
+		return nil, errors.New("User Deleted")
+	}
 	log.Println("existUser: ", existUser)
 
-	var rs sql.Result
 	now := time.Now()
 	now.Format(time.RFC3339) // make Time Format fit to MariaDB.DateTime
-	//log.Println("Check: t := datetime: ", updateTime)
+	log.Println("Check: t := datetime: ", now)
 	if u.Password == "" { // Check if INPUT u.password is BLANK: So, user don't need to change password
-		rs, err = db.Exec(
-			"UPDATE user SET name= ?, updated=? WHERE id=?",
+		s = `UPDATE user
+			SET
+			name= ?,
+			updated=?
+			WHERE id=?`
+		_, err = db.Exec(s,
 			u.Name,
 			now,
 			existUser.ID,
 		)
 	} else {
 		u.SetPass()
-		rs, err = db.Exec(
-			"UPDATE user SET name= ?, secret= ?, updated=? WHERE id =? ",
+		s = `UPDATE user SET
+				name= ?,
+				secret= ?,
+				updated=?
+			WHERE id =?`
+		_, err = db.Exec(s,
 			u.Name,
 			u.Secret,
 			now,
@@ -167,24 +168,11 @@ func (u *User) Update(db *sqlx.DB) (*User, error) {
 	}
 
 	// db.QueryRow to check if correct update record
-	countRow, _ := rs.RowsAffected()
-	log.Println("Number of row updated: ", countRow)
-
-	var updated mysql.NullTime
 	n := User{}
-	err = db.QueryRowx(
-		"SELECT id, name, secret, created, updated FROM user WHERE id =?",
-		existUser.ID,
-	).Scan(
-		&n.ID,
-		&n.Name,
-		&n.Secret,
-		&n.Created,
-		&updated,
-	)
-	//if updated.Valid {
-	//	n.Updated = updated.Time
-	//}
+	s =`SELECT *
+		FROM user
+		WHERE id =?`
+	err = db.Get(&n, s, existUser.ID)
 	if err != nil {
 		log.Println("Error when SELECT updated row??? >>>", err)
 	}
@@ -212,14 +200,18 @@ func (u *User) VerifyPass(p string) error { // not export call from Add() or Upd
 }
 
 func (u *User) FindByName(db *sqlx.DB) error {
-	err := db.QueryRow(
-		"SELECT id, name, secret FROM user WHERE name = ?",
-		u.Name,
-	).Scan(
-		&u.ID,
-		&u.Name,
-		&u.Secret,
-	)
+	sql := `
+		SELECT
+			id,
+			name,
+			secret
+		FROM user
+		WHERE name = ?"`
+	//err := db.QueryRow(sql, u.Name).Scan(
+	//	&u.ID,
+	//	&u.Name,
+	//	&u.Secret)
+	err := db.Get(&u, sql, u.Name)
 	if err != nil {
 		log.Println(err)
 		return err

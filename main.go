@@ -20,7 +20,7 @@ type Config struct {
 }
 
 func main() {
-	// Read configuration file from "cofig.json"
+	// Read configuration file from "config.json"
 	file, _ := os.Open("config.json")
 	decoder := json.NewDecoder(file)
 	config := Config{}
@@ -66,8 +66,8 @@ func SetupRouter(c *c.Env) *mux.Router{
 	log.Println("/v1/login POST UserLogin")
 	s.HandleFunc("/{id:[0-9]+}", c.DelUser).Methods("DELETE")
 	log.Println("/v1/user/:id DELETE UserDelete")
-	s.HandleFunc("/{id:[0-9]+}/undelete", c.UndelUser).Methods("PUT")
-	log.Println("/v1/user/:id/undelete PUT UserUndelete")
+	s.HandleFunc("/{id:[0-9]+}/undel", c.UndelUser).Methods("PUT")
+	log.Println("/v1/user/:id/undel PUT UserUndelete")
 	// Menu
 	s = r.PathPrefix("/v1/menu").Subrouter()
 	s.HandleFunc("/", c.MenuAll).Methods("GET")

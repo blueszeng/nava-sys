@@ -58,39 +58,26 @@ func (u *User) All(db *sqlx.DB) ([]*User, error) {
 	if err != nil {
 		log.Println("Ping Error", err)
 	}
-	rows, err := db.Queryx(
-		"SELECT id, name, created, updated, deleted FROM user")
+
+	var users Users
+	sql := `SELECT id, name, created, updated, deleted FROM user`
+	rows, err := db.Queryx(sql)
 	if err != nil {
 		log.Println(">>> db.Query Error= ", err)
 		return nil, err
 	}
 	defer rows.Close()
-	var users Users
-	//var updated, deleted mysql.NullTime
 	for rows.Next() {
 		// We do not save plain text password to DB, just secret.
-		var i = new(User)
-		err := rows.StructScan(&i)
-		//err := rows.Scan(
-		//	&i.ID,
-		//	&i.Name,
-		//	&i.Created,
-		//	&updated,
-		//	&deleted,
-		//)
-		//if updated.Valid {
-		//	i.Updated = updated.Time
-		//}
-		//if deleted.Valid {
-		//	i.Deleted = deleted.Time
-		//}
+		//var i = new(User)
+		err := rows.StructScan(&u)
 		if err != nil {
 			log.Println(">>> rows.Scan() Error= ", err)
 			return nil, err
 		}
-		// Filter only NOT Deleted User
-		if i.Deleted.Valid == false {
-			users = append(users, i)
+		// Filter Deleted User
+		if u.Deleted.Valid == false {
+			users = append(users, u)
 		}
 	}
 	log.Println("return users", users)

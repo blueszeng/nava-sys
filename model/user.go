@@ -20,12 +20,13 @@ type User struct {
 
 type Users []*User
 
-func (u *User) Show(db *sqlx.DB) (*User, error) {
+func (u *User) Show(db *sqlx.DB) (User, error) {
 	//var updated, deleted mysql.NullTime
+	var user User
 	err := db.QueryRowx(
 		"SELECT id, name, created, updated, deleted FROM user WHERE id = ?",
 		u.ID,
-	).StructScan(&u)
+	).StructScan(&user)
 	//).Scan(
 	//	&u.ID,
 	//	&u.Name,
@@ -41,14 +42,14 @@ func (u *User) Show(db *sqlx.DB) (*User, error) {
 	//}
 	if err != nil {
 		log.Println("Error SELECT in user.Show:", err)
-		return nil, err
+		return user, err
 	}
 	// Filter only NOT Deleted User
 	//if deleted.Valid == true {
 	if u.Deleted.Valid == true {
-		return nil, errors.New("User Deleted. - ผู้ใช้คนนี้ถูกลบแล้ว")
+		return user, errors.New("User Deleted. - ผู้ใช้คนนี้ถูกลบแล้ว")
 	}
-	return u, nil
+	return user, nil
 }
 
 func (u *User) All(db *sqlx.DB) ([]*User, error) {

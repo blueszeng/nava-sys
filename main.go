@@ -51,7 +51,7 @@ func SetupRouter(c *c.Env) *mux.Router{
 	// .StrictSlash(true) help ignore last "/" in URI
 	r := mux.NewRouter().StrictSlash(true)
 	// User
-	s := r.PathPrefix("/api/v1/user").Subrouter()
+	s := r.PathPrefix("/v1/user").Subrouter()
 	s.HandleFunc("/", c.AllUser).Methods("GET")
 	log.Println("/api/v1/index GET UserIndex")
 	s.HandleFunc("/", c.NewUser).Methods("POST")
@@ -69,7 +69,7 @@ func SetupRouter(c *c.Env) *mux.Router{
 	s.HandleFunc("/{id:[0-9]+}/undelete", c.UndelUser).Methods("PUT")
 	log.Println("/api/v1/user/:id/undelete PUT UserUndelete")
 	// Menu
-	s = r.PathPrefix("/api/v1/menu").Subrouter()
+	s = r.PathPrefix("/v1/menu").Subrouter()
 	s.HandleFunc("/", c.MenuAll).Methods("GET")
 	log.Println("/api/v1/menu GET AllMenu")
 	s.HandleFunc("/", c.MenuInsert).Methods("POST")
@@ -77,7 +77,7 @@ func SetupRouter(c *c.Env) *mux.Router{
 	s.HandleFunc("/tree", c.MenuTree).Methods("GET")
 	log.Println("/api/v1/menu/tree GET TreeMenu")
 	// Person
-	s = r.PathPrefix("/api/v1/person").Subrouter()
+	s = r.PathPrefix("/v1/person").Subrouter()
 	s.HandleFunc("/", c.AllPerson).Methods("GET")
 	log.Println("/api/v1/person GET AllPerson")
 	s.HandleFunc("/", c.NewPerson).Methods("POST")

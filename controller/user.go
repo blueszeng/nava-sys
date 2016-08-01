@@ -51,10 +51,10 @@ func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
 
-	if r.Method != "PUT" {
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
+	//if r.Method != "PUT" {
+	//	http.Error(w, http.StatusText(500), 500)
+	//	return
+	//}
 
 	u := new(m.User)
 	decoder := json.NewDecoder(r.Body)

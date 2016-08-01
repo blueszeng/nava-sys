@@ -17,12 +17,10 @@ func (e Env) ShowUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserShow()")
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
-
-	//
-	//if r.Method != "GET" {
-	//	http.Error(w, http.StatusText(500), 500)
-	//	return
-	//}
+	if r.Method != "GET" {
+		http.Error(w, http.StatusText(500), 500)
+		return
+	}
 	v := mux.Vars(r)
 	id := v["id"]
 	u := new(m.User)
@@ -47,14 +45,13 @@ func (e Env) ShowUser(w http.ResponseWriter, r *http.Request) {
 
 func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call PUT UserUpdate()")
-	log.Println("Request Body:", r.Body)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
 
-	//if r.Method != "PUT" {
-	//	http.Error(w, http.StatusText(500), 500)
-	//	return
-	//}
+	if r.Method != "PUT" {
+		http.Error(w, http.StatusText(500), 500)
+		return
+	}
 
 	u := new(m.User)
 	decoder := json.NewDecoder(r.Body)
@@ -88,10 +85,10 @@ func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 func (e *Env) AllUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET All User()")
-	//if r.Method != "GET" {
-	//	http.Error(w, http.StatusText(500), 500)
-	//	return
-	//}
+	if r.Method != "GET" {
+		http.Error(w, http.StatusText(500), 500)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
 
@@ -218,6 +215,8 @@ func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(500), 500)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
 
 	u := m.User{}
 	decode := json.NewDecoder(r.Body)
@@ -259,6 +258,8 @@ func (e Env) SearchUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(500), 500)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
 
 	// get search string from r.Body
 	var s api.Search
@@ -283,6 +284,7 @@ func (e Env) SearchUser(w http.ResponseWriter, r *http.Request) {
 		rs.Message = "FOUND"
 		rs.Result = users
 	}
+	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s", string(output))
 }

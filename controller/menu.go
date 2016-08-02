@@ -61,13 +61,13 @@ func (e *Env) AllMenuTree(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error in m.Menu.All: ", err)
 	}
-	tree := CreateTree(menus)
+	tree := CreateMenuTree(menus)
 	w.WriteHeader(http.StatusOK)
-	output, _ := json.Marshal(tree.Child) // remove root node from jsonNode
+	output, _ := json.Marshal(tree.Child) // remove root node from tree
 	fmt.Fprintf(w, string(output))
 }
 
-func (e *Env) FindMenuTreeByUser(w http.ResponseWriter, r *http.Request) {
+func (e *Env) UserMenuTree(w http.ResponseWriter, r *http.Request) {
 	log.Println("FindMenuByUser()...")
 	if r.Method != "GET"{
 		http.Error(w, http.StatusText(500), 500)
@@ -81,44 +81,25 @@ func (e *Env) FindMenuTreeByUser(w http.ResponseWriter, r *http.Request) {
 	u := new(m.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
 
-	menus, err := u.FindMenuByUser(e.DB)
+	menus, err := u.UserMenu(e.DB)
 	if err != nil {
 		log.Fatal("Error call u.FindMenuByUser()", err)
 	}
 
-	tree := CreateTree(menus)
+	tree := CreateMenuTree(menus)
 
 	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(tree.Child)
 	fmt.Fprintf(w, string(output))
 }
 
-func CreateTree(menus []*m.Menu) *m.Node {
+func CreateMenuTree(menus []*m.Menu) *m.Menu {
 	// Setup root node
-	tree := new(m.Node)
-	tree.ID = menus[0].ID
-	tree.ParentID = menus[0].ParentID
-	tree.Text = menus[0].Text
-	tree.Icon = menus[0].Icon
-	tree.SelectedIcon = menus[0].SelectedIcon
-	tree.Href = menus[0].Href
-	tree.Path = menus[0].Path
-	tree.Note = menus[0].Note
+	tree := new(m.Menu)
 	// Adding child node
-	for k, menu := range menus {
-		n := new(m.Node)
-		if k != 0 {
-			n.ID = menu.ID
-			n.ParentID = menu.ParentID
-			n.Text = menu.Text
-			n.Icon = menu.Icon
-			n.SelectedIcon = menu.SelectedIcon
-			n.Href = menu.Href
-			n.Path = menu.Path
-			n.Note = menu.Note
-			log.Println("n=", n)
-			tree.Add(n)
-		}
+	for _, m := range menus {
+		tree.Add(m)
 	}
+	log.Println("tree= ", tree)
 	return tree
 }

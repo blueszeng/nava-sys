@@ -6,14 +6,15 @@ import (
 )
 
 type Menu struct {
-	ID           uint64 `json:"id"`
-	ParentID     uint64 `json:"parent_id" db:"parent_id"`
-	Text         string `json:"text"`
-	Icon         string `json:"icon"`
-	SelectedIcon string `json:"selectedIcon" db:"selected_icon"`
-	Href         string `json:"href"`
-	Path         string `json:"path"`
-	Note         string `json:"note"`
+	ID           uint64  `json:"id"`
+	ParentID     uint64  `json:"parent_id" db:"parent_id"`
+	Text         string  `json:"text"`
+	Icon         string  `json:"icon"`
+	SelectedIcon string  `json:"selectedIcon" db:"selected_icon"`
+	Href         string  `json:"href"`
+	Path         string  `json:"path"`
+	Note         string  `json:"note"`
+	Child        []*Menu `json:"nodes,omitempty"`
 }
 
 type Menus []*Menu
@@ -49,7 +50,7 @@ func (m *Menu) All(db *sqlx.DB) ([]*Menu, error) {
 
 func (m *Menu) Insert(db *sqlx.DB) error {
 	log.Println("Start m.New()")
-	sql := `INSERT INTO menu (SELECT
+	sql := `INSERT INTO menu (
 		parent_id,
 		text,
 		icon,
@@ -57,6 +58,7 @@ func (m *Menu) Insert(db *sqlx.DB) error {
 		href,
 		path,
 		note
+	)
 	VALUES(?,?,?,?,?,?)`
 
 	rs, err := db.Exec(sql,
@@ -69,22 +71,13 @@ func (m *Menu) Insert(db *sqlx.DB) error {
 		m.Note,
 	)
 	if err != nil {
-		log.Println(">>>Error cannot exec INSERT menu: >>>", err)
+		log.Println(">>>Error exec INSERT menu: >>>", err)
 		return err
 	}
 	log.Println(rs)
-	lastID, _ := rs.LastInsertId()
-	sql = `SELECT
-		id,
-		parent_id,
-		text,
-		icon,
-		selected_icon,
-		href,
-		path,
-		note
-	FROM menu WHERE id = ?`
 	menu := new(Menu)
+	sql = `SELECT * FROM menu WHERE id = ?`
+	lastID, _ := rs.LastInsertId()
 	err = db.Get(&menu, sql, lastID)
 	if err != nil {
 		return err
@@ -93,7 +86,7 @@ func (m *Menu) Insert(db *sqlx.DB) error {
 	return nil
 }
 
-func (u *User) FindMenuByUser(db *sqlx.DB) ([]*Menu, error) {
+func (u *User) UserMenu(db *sqlx.DB) ([]*Menu, error) {
 	s := `
 	SELECT
 		menu.*
@@ -111,6 +104,38 @@ func (u *User) FindMenuByUser(db *sqlx.DB) ([]*Menu, error) {
 	}
 	return menus, nil
 }
+
+func (this *Menu) Size() int {
+	var size int = len(this.Child)
+	for _, c := range this.Child {
+		size += c.Size()
+	}
+	return size
+}
+
+func (this *Menu) Add(menus ...*Menu) bool {
+	var size = this.Size()
+	for _, node := range menus {
+		if node.ParentID == this.ID {
+			this.Child = append(this.Child, node)
+		} else {
+			for _, child := range this.Child {
+				if child.Add(node) {
+					break
+				}
+			}
+		}
+	}
+	return this.Size() == size+len(menus)
+}
+
+//func (menus *Menus) Tree() *Menu {
+//	tree := new(Menu)
+//	for _, m := range menus{
+//		tree.Add(m)
+//	}
+//	return tree
+//}
 
 //func removeDuplicates(a []uint64) []uint64 {
 //	result := []uint64{}

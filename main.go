@@ -70,13 +70,14 @@ func SetupRouter(c *c.Env) *mux.Router{
 	log.Println("/v1/user/:id/undel PUT UserUndelete")
 	// Menu
 	s = r.PathPrefix("/v1/menu").Subrouter()
-	s.HandleFunc("/", c.MenuAll).Methods("GET")
+	s.HandleFunc("/", c.AllMenu).Methods("GET")
 	log.Println("/v1/menu GET AllMenu")
-	s.HandleFunc("/", c.MenuInsert).Methods("POST")
+	s.HandleFunc("/", c.NewMenu).Methods("POST")
 	log.Println("/v1/menu POST NewMenu")
-	s.HandleFunc("/tree", c.MenuTree).Methods("GET")
+	s.HandleFunc("/tree", c.AllMenuTree).Methods("GET")
 	log.Println("/v1/menu/tree GET TreeMenu")
-	s.HandleFunc("/tree/user/{id:[0-9]+}", c.FindMenuByUser).Methods("GET")
+	s.HandleFunc("/tree/user/{id:[0-9]+}", c.FindMenuTreeByUser).Methods("GET")
+	log.Println("/v1/menu/tree GET FindMenuTreeByUser")
 	// Person
 	s = r.PathPrefix("/v1/person").Subrouter()
 	s.HandleFunc("/", c.AllPerson).Methods("GET")

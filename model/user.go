@@ -207,16 +207,11 @@ func (u *User) Del(db *sqlx.DB) (*User, error) {
 	now := time.Now()
 	now.Format(time.RFC3339)
 	sql := "UPDATE user SET deleted = ? WHERE id = ?"
-	rs, err := db.Exec(sql, now, u.ID)
+	_, err := db.Exec(sql, now, u.ID)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
-	rowCnt, err := rs.RowsAffected()
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println("Deleted:", rowCnt, "row(s).")
 
 	var user User
 	sql = `SELECT * FROM user WHERE id =?`

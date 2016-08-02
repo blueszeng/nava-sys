@@ -76,6 +76,7 @@ func SetupRouter(c *c.Env) *mux.Router{
 	log.Println("/v1/menu POST NewMenu")
 	s.HandleFunc("/tree", c.MenuTree).Methods("GET")
 	log.Println("/v1/menu/tree GET TreeMenu")
+	s.HandleFunc("/tree/user/{id:[0-9]+}", c.FindMenuByUser).Methods("GET")
 	// Person
 	s = r.PathPrefix("/v1/person").Subrouter()
 	s.HandleFunc("/", c.AllPerson).Methods("GET")

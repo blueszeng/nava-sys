@@ -1,8 +1,8 @@
 package model
 // TODO: Move/Merge Node into Menu model by embeded Node struct.
 type Node struct {
-	ID       int     `json:"-"`
-	ParentID int     `json:"-"`
+	ID       uint64     `json:"-"`
+	ParentID uint64     `json:"-"`
 	Text     string  `json:"text"`
 	Icon     string  `json:"icon"`
 	SelectedIcon string `json:"selectedIcon"`

@@ -299,54 +299,32 @@ func SearchUsers(db *sqlx.DB, s string) (Users, error) {
 	return users, nil
 }
 
-func (u *User) FindMenuByUser(db *sqlx.DB) (*Menu, error) {
-	var userRole UserRole
-	var roleIDs []uint64
-	s := `SELECT * FROM user_role WHERE user_id =?`
-	rows, err := db.Queryx(s, u.ID)
-	if err != nil {
-		log.Fatal(err)
-	}
-	// TODO: Not finished yet. Next loop userRoles to return menu tree
-	// TODO: and skip same menu
-	for rows.Next() {
-		rows.StructScan(&userRole)
-		roleIDs = append(roleIDs, userRole.RoleID)
-	}
-
-	var (
-		roleMenus []RoleMenu
-		menuIDs []uint64
-	)
-	s = `SELECT * FROM menu_role WHERE role_id = ?`
-	for _, id := range roleIDs {
-		err = db.Select(&roleMenus, s, id)
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, rm := range roleMenus {
-			menuIDs = append(menuIDs, rm.MenuID)
-		}
-	}
-	menuIDs = removeDuplicates(menuIDs)
+func (u *User) FindMenuByUser(db *sqlx.DB) ([]*Menu, error) {
+	s := `
+	SELECT
+		user.name,
+		role.th as role_th,
+		role.en as role_en,
+		menu.id,
+		menu.text
+	FROM user
+	LEFT JOIN user_role ON user.id = user_role.user_id
+	LEFT JOIN role ON user_role.role_id = role.id
+	LEFT JOIN role_menu ON role.id = role_menu.role_id
+	LEFT JOIN menu ON role_menu.menu_id = menu.id
+	WHERE user.id = ?
+	`
 	var menus []*Menu
-	// Todo: Select Menu where id = menuIDs
-
-	jsonNode := new(Node)
-	jsonNode.ID = menus[0].ID
-	jsonNode.ParentID = menus[0].ParentID
-	jsonNode.Text = menus[0].Text
-	jsonNode.Icon = menus[0].Icon
-	jsonNode.SelectedIcon = menus[0].SelectedIcon
-	jsonNode.Path = menus[0].Path
-	jsonNode.Note = menus[0].Note
-
-	return nil
+	err := db.Get(&menus, s, u.ID)
+	if err != nil {
+		log.Fatal("Error in db.Get(): ", err)
+	}
+	return menus, nil
 }
 
-func removeDuplicates(a []int) []int {
-	result := []int{}
-	seen := map[int]int{}
+func removeDuplicates(a []uint64) []uint64 {
+	result := []uint64{}
+	seen := map[uint64]uint64{}
 	for _, val := range a {
 		if _, ok := seen[val]; !ok {
 			result = append(result, val)

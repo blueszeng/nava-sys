@@ -6,8 +6,8 @@ import (
 )
 
 type Menu struct {
-	ID       int    `json:"id"`
-	ParentID int    `json:"parent_id"`
+	ID       uint64    `json:"id"`
+	ParentID uint64    `json:"parent_id"`
 	Text     string `json:"name"`
 	Icon     string `json:"icon"`
 	SelectedIcon string `json:"selectedIcon" db:"selected_icon"`

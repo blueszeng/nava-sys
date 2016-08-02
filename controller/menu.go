@@ -136,8 +136,7 @@ func (e *Env) FindMenuByUser(w http.ResponseWriter, r *http.Request) {
 			jsonNode.Add(n)
 		}
 	}
-
 	w.WriteHeader(http.StatusOK)
-	output, _ := json.Marshal(jsonNode)
+	output, _ := json.Marshal(jsonNode.Child)
 	fmt.Fprintf(w, string(output))
 }

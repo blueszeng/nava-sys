@@ -100,6 +100,5 @@ func CreateMenuTree(menus []*m.Menu) *m.Menu {
 	for _, m := range menus {
 		tree.Add(m)
 	}
-	log.Println("tree= ", tree)
 	return tree
 }

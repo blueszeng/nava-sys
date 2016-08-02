@@ -86,25 +86,6 @@ func (m *Menu) Insert(db *sqlx.DB) error {
 	return nil
 }
 
-func (u *User) UserMenu(db *sqlx.DB) ([]*Menu, error) {
-	s := `
-	SELECT
-		menu.*
-	FROM user
-	LEFT JOIN user_role ON user.id = user_role.user_id
-	LEFT JOIN role ON user_role.role_id = role.id
-	LEFT JOIN role_menu ON role.id = role_menu.role_id
-	LEFT JOIN menu ON role_menu.menu_id = menu.id
-	WHERE user.id = ?
-	`
-	var menus []*Menu
-	err := db.Select(&menus, s, u.ID)
-	if err != nil {
-		log.Fatal("Error in db.Select(): ", err)
-	}
-	return menus, nil
-}
-
 func (this *Menu) Size() int {
 	var size int = len(this.Child)
 	for _, c := range this.Child {

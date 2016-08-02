@@ -89,21 +89,10 @@ func (u *User) New(db *sqlx.DB) (*User, error) {
 		log.Println(">>>Error cannot exec INSERT User: >>>", err)
 		return nil, err
 	}
-
 	lastID, _ := rs.LastInsertId()
-	num, _ := rs.RowsAffected()
-	log.Printf("Last insert ID = %d, Number of rows = %d", lastID, num)
-
 	// test query data
 	n := new(User)
-	err = db.QueryRow(
-		"SELECT id, name, created FROM user WHERE id = ?",
-		lastID,
-	).Scan(
-		&n.ID,
-		&n.Name,
-		&n.Created,
-	)
+	err = db.Get(&n, "SELECT id, name, created FROM user WHERE id = ?", lastID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Println("Error not found: ", err)
@@ -192,30 +181,25 @@ func (u *User) SetPass() error {
 
 func (u *User) VerifyPass(p string) error { // not export call from Add() or Update
 	err := bcrypt.CompareHashAndPassword(u.Secret, []byte(p))
+	log.Println("bcrypt...",u.Secret, p)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (u *User) FindByName(db *sqlx.DB) error {
+func (u *User) FindByName(db *sqlx.DB) (*User, error) {
 	sql := `
-		SELECT
-			id,
-			name,
-			secret
+		SELECT *
 		FROM user
-		WHERE name = ?"`
-	//err := db.QueryRow(sql, u.Name).Scan(
-	//	&u.ID,
-	//	&u.Name,
-	//	&u.Secret)
-	err := db.Get(&u, sql, u.Name)
+		WHERE name = ?`
+	var user User
+	err := db.Get(&user, sql, u.Name)
 	if err != nil {
 		log.Println(err)
-		return err
+		return nil, err
 	}
-	return nil
+	return &user, nil
 }
 
 // Method models.User.Del to delete User (Later we will implement my framework just add delete DateX

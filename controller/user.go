@@ -98,7 +98,7 @@ func (e *Env) AllUser(w http.ResponseWriter, r *http.Request) {
 	rs := api.Response{}
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
-		rs.Status = "500"
+		rs.Status = "500xxx"
 		rs.Message = err.Error()
 	} else {
 		rs.Status = "200"
@@ -117,7 +117,6 @@ func (e *Env) NewUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("Request Body:", r.Body)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
-
 
 	if r.Method != "POST" {
 		http.Error(w, http.StatusText(500), 500)
@@ -148,7 +147,7 @@ func (e *Env) NewUser(w http.ResponseWriter, r *http.Request) {
 		rs.Message = err.Error()
 	} else {
 		rs.Status = "201"
-		rs.Message = "CREATED"
+		rs.Message = "New user CREATED"
 		rs.Result = newUser
 	}
 	w.WriteHeader(http.StatusOK)
@@ -218,8 +217,6 @@ func (e Env) UndelUser(w http.ResponseWriter, r *http.Request) {
 // Login Endpoint
 func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call POST Login()")
-	log.Println("Request Body:", r.Body)
-
 	if r.Method != "POST" {
 		http.Error(w, http.StatusText(500), 500)
 		return
@@ -227,32 +224,35 @@ func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
 
-	u := m.User{}
+	var uLogin m.User
 	decode := json.NewDecoder(r.Body)
-	err := decode.Decode(&u)
+	err := decode.Decode(&uLogin)
 	if err != nil {
 		log.Println("Error decode.Decode(&u) >>", err)
 	}
-	log.Println("Success decode JSON -> :", u, " Result user decoded -> ", u)
+	log.Println("Success decode JSON -> :", uLogin, " Result user decoded -> ", uLogin)
 
 	// Read User.ID, User.Secret by User.Name from DB
-	err = u.FindByName(e.DB)
+	uData, err := uLogin.FindByName(e.DB)
 	if err != nil {
 		log.Println(err)
 	}
-	log.Println("u.SearchByName--> user = ", u)
+	log.Println("u.SearchByName--> user = ", uData)
 
 	// Verify Password
-	err = u.VerifyPass(u.Password)
+	log.Println ("u.Password:", uLogin.Password)
+	err = uData.VerifyPass(uLogin.Password)
 	rs := api.Response{}
 	if err != nil {
 		log.Println(err)
-		rs.Status = "500"
+		rs.Status = "Error"
 		rs.Message = err.Error()
 	} else {
 		log.Println("Verify Password PASS!!")
 		rs.Status = "200"
 		rs.Message = "LOGIN SUCCESS"
+		uData.Secret = nil
+		rs.Result = uData
 	}
 	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)

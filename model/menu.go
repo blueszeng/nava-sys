@@ -8,10 +8,10 @@ import (
 type Menu struct {
 	ID           uint64 `json:"id"`
 	ParentID     uint64 `json:"parent_id" db:"parent_id"`
-	Text         string `json:"name"`
+	Text         string `json:"text"`
 	Icon         string `json:"icon"`
 	SelectedIcon string `json:"selectedIcon" db:"selected_icon"`
-	Href         string `json:"href" db:"href"`
+	Href         string `json:"href"`
 	Path         string `json:"path"`
 	Note         string `json:"note"`
 }
@@ -37,42 +37,11 @@ type RoleMenu struct {
 }
 
 func (m *Menu) All(db *sqlx.DB) ([]*Menu, error) {
-	rows, err := db.Query(`
-	SELECT
-		id,
-		parent_id,
-		text,
-		icon,
-		selected_icon,
-		href,
-		path,
-		note
-	FROM menu
-	`)
+	var menus Menus
+	err := db.Select(&menus, `SELECT * FROM menu`)
 	if err != nil {
 		log.Println(">>> 1. db.Query Error= ", err)
 		return nil, err
-	}
-	defer rows.Close()
-
-	var menus Menus
-	for rows.Next() {
-		m := new(Menu)
-		err := rows.Scan(
-			&m.ID,
-			&m.ParentID,
-			&m.Text,
-			&m.Icon,
-			&m.SelectedIcon,
-			&m.Href,
-			&m.Path,
-			&m.Note,
-		)
-		if err != nil {
-			log.Println(">>> rows.Scan() Error= ", err)
-			return nil, err
-		}
-		menus = append(menus, m)
 	}
 	log.Println("Menu:", menus)
 	return menus, nil

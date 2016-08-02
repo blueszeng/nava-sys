@@ -110,16 +110,25 @@ func (e *Env) FindMenuByUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal("Error call u.FindMenuByUser()", err)
 	}
+
+	tree := CreateTree(menus)
+
+	w.WriteHeader(http.StatusOK)
+	output, _ := json.Marshal(tree.Child)
+	fmt.Fprintf(w, string(output))
+}
+
+func CreateTree(menus []m.Menu) m.Node {
 	// Setup root node
-	jsonNode := new(m.Node)
-	jsonNode.ID = menus[0].ID
-	jsonNode.ParentID = menus[0].ParentID
-	jsonNode.Text = menus[0].Text
-	jsonNode.Icon = menus[0].Icon
-	jsonNode.SelectedIcon = menus[0].SelectedIcon
-	jsonNode.Href = menus[0].Href
-	jsonNode.Path = menus[0].Path
-	jsonNode.Note = menus[0].Note
+	tree := new(m.Node)
+	tree.ID = menus[0].ID
+	tree.ParentID = menus[0].ParentID
+	tree.Text = menus[0].Text
+	tree.Icon = menus[0].Icon
+	tree.SelectedIcon = menus[0].SelectedIcon
+	tree.Href = menus[0].Href
+	tree.Path = menus[0].Path
+	tree.Note = menus[0].Note
 	// Adding child node
 	for k, menu := range menus {
 		n := new(m.Node)
@@ -133,10 +142,8 @@ func (e *Env) FindMenuByUser(w http.ResponseWriter, r *http.Request) {
 			n.Path = menu.Path
 			n.Note = menu.Note
 			log.Println("n=", n)
-			jsonNode.Add(n)
+			tree.Add(n)
 		}
 	}
-	w.WriteHeader(http.StatusOK)
-	output, _ := json.Marshal(jsonNode.Child)
-	fmt.Fprintf(w, string(output))
+	return tree
 }

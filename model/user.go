@@ -248,7 +248,7 @@ func (u *User) Undel(db *sqlx.DB) (*User, error) {
 	return &user, nil
 }
 
-func (u *User) UserMenu(db *sqlx.DB) ([]*Menu, error) {
+func (u *User) Menus(db *sqlx.DB) ([]*Menu, error) {
 	s := `
 	SELECT
 		menu.*

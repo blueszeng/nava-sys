@@ -1,15 +1,9 @@
 package model
 
-// TODO: Move/Merge Node into Menu model by embeded Node struct.
+// Todo: Make Node{} to be "Base struct" for Tree-able struct.
 type Node struct {
 	ID           uint64  `json:"-"`
 	ParentID     uint64  `json:"-"`
-	Text         string  `json:"text"`
-	Icon         string  `json:"icon"`
-	SelectedIcon string  `json:"selectedIcon"`
-	Href         string  `json:"href"`
-	Path         string  `json:"-"`
-	Note         string  `json:"-"`
 	Child        []*Node `json:"nodes,omitempty"`
 }
 

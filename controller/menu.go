@@ -81,7 +81,7 @@ func (e *Env) UserMenuTree(w http.ResponseWriter, r *http.Request) {
 	u := new(m.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
 
-	menus, err := u.UserMenu(e.DB)
+	menus, err := u.Menus(e.DB)
 	if err != nil {
 		log.Fatal("Error call u.FindMenuByUser()", err)
 	}

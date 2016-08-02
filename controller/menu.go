@@ -93,7 +93,7 @@ func (e *Env) FindMenuTreeByUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(output))
 }
 
-func CreateTree(menus []m.Menu) m.Node {
+func CreateTree(menus []*m.Menu) *m.Node {
 	// Setup root node
 	tree := new(m.Node)
 	tree.ID = menus[0].ID

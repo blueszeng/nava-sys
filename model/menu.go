@@ -1,19 +1,19 @@
 package model
 
 import (
-	"log"
 	"github.com/jmoiron/sqlx"
+	"log"
 )
 
 type Menu struct {
-	ID       uint64    `json:"id"`
-	ParentID uint64    `json:"parent_id"`
-	Text     string `json:"name"`
-	Icon     string `json:"icon"`
+	ID           uint64 `json:"id"`
+	ParentID     uint64 `json:"parent_id" db:"parent_id"`
+	Text         string `json:"name"`
+	Icon         string `json:"icon"`
 	SelectedIcon string `json:"selectedIcon" db:"selected_icon"`
-	Href string `json:"href" db:"href"`
-	Path     string `json:"path"`
-	Note     string `json:"note"`
+	Href         string `json:"href" db:"href"`
+	Path         string `json:"path"`
+	Note         string `json:"note"`
 }
 
 type Menus []*Menu
@@ -30,9 +30,9 @@ type UserRole struct {
 }
 
 type RoleMenu struct {
-	RoleID uint64
-	MenuID uint64
-	CanRead bool
+	RoleID   uint64
+	MenuID   uint64
+	CanRead  bool
 	CanWrite bool
 }
 
@@ -130,4 +130,3 @@ func (m *Menu) Insert(db *sqlx.DB) error {
 	log.Println("Success insert record:", m)
 	return nil
 }
-

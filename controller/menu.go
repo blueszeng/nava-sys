@@ -116,6 +116,7 @@ func (e *Env) FindMenuByUser(w http.ResponseWriter, r *http.Request) {
 	jsonNode.Text = menus[0].Text
 	jsonNode.Icon = menus[0].Icon
 	jsonNode.SelectedIcon = menus[0].SelectedIcon
+	jsonNode.Href = menus[0].Href
 	jsonNode.Path = menus[0].Path
 	jsonNode.Note = menus[0].Note
 	// Adding child node
@@ -127,6 +128,7 @@ func (e *Env) FindMenuByUser(w http.ResponseWriter, r *http.Request) {
 			n.Text = menu.Text
 			n.Icon = menu.Icon
 			n.SelectedIcon = menu.SelectedIcon
+			n.Href = menu.Href
 			n.Path = menu.Path
 			n.Note = menu.Note
 			log.Println("n=", n)

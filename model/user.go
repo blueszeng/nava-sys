@@ -302,11 +302,7 @@ func SearchUsers(db *sqlx.DB, s string) (Users, error) {
 func (u *User) FindMenuByUser(db *sqlx.DB) ([]*Menu, error) {
 	s := `
 	SELECT
-		user.name,
-		role.th as role_th,
-		role.en as role_en,
-		menu.id,
-		menu.text
+		menu.*
 	FROM user
 	LEFT JOIN user_role ON user.id = user_role.user_id
 	LEFT JOIN role ON user_role.role_id = role.id
@@ -315,21 +311,21 @@ func (u *User) FindMenuByUser(db *sqlx.DB) ([]*Menu, error) {
 	WHERE user.id = ?
 	`
 	var menus []*Menu
-	err := db.Get(&menus, s, u.ID)
+	err := db.Select(&menus, s, u.ID)
 	if err != nil {
-		log.Fatal("Error in db.Get(): ", err)
+		log.Fatal("Error in db.Select(): ", err)
 	}
 	return menus, nil
 }
 
-func removeDuplicates(a []uint64) []uint64 {
-	result := []uint64{}
-	seen := map[uint64]uint64{}
-	for _, val := range a {
-		if _, ok := seen[val]; !ok {
-			result = append(result, val)
-			seen[val] = val
-		}
-	}
-	return result
-}
+//func removeDuplicates(a []uint64) []uint64 {
+//	result := []uint64{}
+//	seen := map[uint64]uint64{}
+//	for _, val := range a {
+//		if _, ok := seen[val]; !ok {
+//			result = append(result, val)
+//			seen[val] = val
+//		}
+//	}
+//	return result
+//}

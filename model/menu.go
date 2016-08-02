@@ -30,8 +30,8 @@ type UserRole struct {
 }
 
 type RoleMenu struct {
-	Role Role
-	Menu Menu
+	RoleID uint64
+	MenuID uint64
 	CanRead bool
 	CanWrite bool
 }

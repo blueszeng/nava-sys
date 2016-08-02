@@ -299,14 +299,59 @@ func SearchUsers(db *sqlx.DB, s string) (Users, error) {
 	return users, nil
 }
 
-func (u *User) FindMenuByUser(db *sqlx.DB) error {
-	var userRoles []UserRole
+func (u *User) FindMenuByUser(db *sqlx.DB) (*Menu, error) {
+	var userRole UserRole
+	var roleIDs []uint64
 	s := `SELECT * FROM user_role WHERE user_id =?`
-	err := db.Select(&userRoles, s, u.ID)
+	rows, err := db.Queryx(s, u.ID)
 	if err != nil {
 		log.Fatal(err)
 	}
 	// TODO: Not finished yet. Next loop userRoles to return menu tree
 	// TODO: and skip same menu
+	for rows.Next() {
+		rows.StructScan(&userRole)
+		roleIDs = append(roleIDs, userRole.RoleID)
+	}
+
+	var (
+		roleMenus []RoleMenu
+		menuIDs []uint64
+	)
+	s = `SELECT * FROM menu_role WHERE role_id = ?`
+	for _, id := range roleIDs {
+		err = db.Select(&roleMenus, s, id)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, rm := range roleMenus {
+			menuIDs = append(menuIDs, rm.MenuID)
+		}
+	}
+	menuIDs = removeDuplicates(menuIDs)
+	var menus []*Menu
+	// Todo: Select Menu where id = menuIDs
+
+	jsonNode := new(Node)
+	jsonNode.ID = menus[0].ID
+	jsonNode.ParentID = menus[0].ParentID
+	jsonNode.Text = menus[0].Text
+	jsonNode.Icon = menus[0].Icon
+	jsonNode.SelectedIcon = menus[0].SelectedIcon
+	jsonNode.Path = menus[0].Path
+	jsonNode.Note = menus[0].Note
+
 	return nil
+}
+
+func removeDuplicates(a []int) []int {
+	result := []int{}
+	seen := map[int]int{}
+	for _, val := range a {
+		if _, ok := seen[val]; !ok {
+			result = append(result, val)
+			seen[val] = val
+		}
+	}
+	return result
 }

@@ -1,5 +1,5 @@
 package model
-
+// TODO: Move/Merge Node into Menu model by embeded Node struct.
 type Node struct {
 	ID       int     `json:"-"`
 	ParentID int     `json:"-"`

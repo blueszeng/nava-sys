@@ -47,7 +47,8 @@ func (m *Menu) All(db *sqlx.DB) ([]*Menu, error) {
 		href,
 		path,
 		note
-	FROM menu`)
+	FROM menu
+	`)
 	if err != nil {
 		log.Println(">>> 1. db.Query Error= ", err)
 		return nil, err
@@ -114,19 +115,11 @@ func (m *Menu) Insert(db *sqlx.DB) error {
 		path,
 		note
 	FROM menu WHERE id = ?`
-	err = db.QueryRow(sql, lastID).Scan(
-		&m.ID,
-		&m.ParentID,
-		&m.Text,
-		&m.Icon,
-		&m.SelectedIcon,
-		&m.Href,
-		&m.Path,
-		&m.Note,
-	)
+	menu := new(Menu)
+	err = db.Get(&menu, sql, lastID)
 	if err != nil {
 		return err
 	}
-	log.Println("Success insert record:", m)
+	log.Println("Success insert record:", menu)
 	return nil
 }

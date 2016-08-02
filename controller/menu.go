@@ -87,9 +87,8 @@ func (e *Env) MenuTree(w http.ResponseWriter, r *http.Request) {
 			jsonNode.Add(n)
 		}
 	}
-	// Todo: how to remove root node from jsonNode?
 	w.WriteHeader(http.StatusOK)
-	output, _ := json.Marshal(jsonNode)
+	output, _ := json.Marshal(jsonNode.Child) // remove root node from jsonNode
 	fmt.Fprintf(w, string(output))
 }
 

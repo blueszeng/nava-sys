@@ -1,17 +1,17 @@
 package model
+
 // TODO: Move/Merge Node into Menu model by embeded Node struct.
 type Node struct {
-	ID       uint64     `json:"-"`
-	ParentID uint64     `json:"-"`
-	Text     string  `json:"text"`
-	Icon     string  `json:"icon"`
-	SelectedIcon string `json:"selectedIcon"`
-	Href string `json:"href"`
-	Path     string  `json:"-"`
-	Note     string  `json:"-"`
-	Child    []*Node `json:"nodes,omitempty"`
+	ID           uint64  `json:"-"`
+	ParentID     uint64  `json:"-"`
+	Text         string  `json:"text"`
+	Icon         string  `json:"icon"`
+	SelectedIcon string  `json:"selectedIcon"`
+	Href         string  `json:"href"`
+	Path         string  `json:"-"`
+	Note         string  `json:"-"`
+	Child        []*Node `json:"nodes,omitempty"`
 }
-
 
 func (this *Node) Size() int {
 	var size int = len(this.Child)

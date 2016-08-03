@@ -38,7 +38,7 @@ func (e *Env) NewMenu(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error decode.Decode(&m) >>", err)
 	}
-	err = m.Insert(e.DB)
+	err = m.New(e.DB)
 	if err != nil {
 		fmt.Println("Error Insert DB:", err)
 		w.WriteHeader(http.StatusNotImplemented)

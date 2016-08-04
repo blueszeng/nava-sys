@@ -15,11 +15,10 @@ func (e *Env) NewPerson(w http.ResponseWriter, r *http.Request) {
 	log.Println("call POST New Person()")
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
-
-	//if r.Method != "POST" {
-	//	http.Error(w, http.StatusText(500), 500)
-	//	return
-	//}
+	if r.Method != "POST" {
+		http.Error(w, http.StatusText(500), 500)
+		return
+	}
 	p := m.Person{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&p)

@@ -17,6 +17,7 @@ type Config struct {
 	DBName string `json:"db_name"`
 	DBUser string `json:"db_user"`
 	DBPass string `json:"db_pass"`
+
 }
 
 func main() {
@@ -51,41 +52,26 @@ func SetupRouter(c *c.Env) *mux.Router{
 	// .StrictSlash(true) help ignore last "/" in URI
 	r := mux.NewRouter().StrictSlash(true)
 	// User
-	s := r.PathPrefix("/v1/user").Subrouter()
-	s.HandleFunc("/", c.AllUser).Methods("GET")
-	log.Println("/v1/index GET UserIndex")
-	s.HandleFunc("/", c.NewUser).Methods("POST")
-	log.Println("/v1/user POST UserInsert")
-	s.HandleFunc("/{id:[0-9]+}", c.ShowUser).Methods("GET")
-	log.Println("/v1/user/:id GET UserShow")
-	s.HandleFunc("/{id:[0-9]+}", c.UpdateUser).Methods("PUT")
-	log.Println("/v1/user/:id PUT UserUpdate ")
-	s.HandleFunc("/search", c.SearchUser).Methods("POST")
-	log.Println("/v1/user/search POST UserSearch")
-	s.HandleFunc("/login", c.LoginUser).Methods("POST")
-	log.Println("/v1/login POST UserLogin")
-	s.HandleFunc("/{id:[0-9]+}", c.DelUser).Methods("DELETE")
-	log.Println("/v1/user/:id DELETE UserDelete")
-	s.HandleFunc("/{id:[0-9]+}/undel", c.UndelUser).Methods("PUT")
-	log.Println("/v1/user/:id/undel PUT UserUndelete")
+	s := r.PathPrefix("/v1/users").Subrouter()
+	s.HandleFunc("/", c.AllUser).Methods("GET"); log.Println("/v1/users GET AllUser");
+	s.HandleFunc("/", c.NewUser).Methods("POST"); log.Println("/v1/users POST New User")
+	s.HandleFunc("/{id:[0-9]+}", c.ShowUser).Methods("GET"); log.Println("/v1/users/:id GET Show User")
+	s.HandleFunc("/{id:[0-9]+}", c.UpdateUser).Methods("POST"); log.Println("/v1/users/:id POST Update User")
+	s.HandleFunc("/search", c.SearchUser).Methods("POST"); log.Println("/v1/users/search POST Search User")
+	s.HandleFunc("/login", c.LoginUser).Methods("POST"); log.Println("/v1/login POST UserLogin")
+	s.HandleFunc("/{id:[0-9]+}", c.DelUser).Methods("DELETE"); log.Println("/v1/users/:id DELETE UserDelete")
+	s.HandleFunc("/{id:[0-9]+}/undel", c.UndelUser).Methods("POST"); log.Println("/v1/users/:id/undel PUT UserUndelete")
 	// Menu
-	s = r.PathPrefix("/v1/menu").Subrouter()
-	s.HandleFunc("/", c.AllMenu).Methods("GET")
-	log.Println("/v1/menu GET AllMenu")
-	s.HandleFunc("/", c.NewMenu).Methods("POST")
-	log.Println("/v1/menu POST NewMenu")
-	s.HandleFunc("/tree", c.AllMenuTree).Methods("GET")
-	log.Println("/v1/menu/tree GET TreeMenu")
-	s.HandleFunc("/tree/user/{id:[0-9]+}", c.UserMenuTree).Methods("GET")
-	log.Println("/v1/menu/tree GET FindMenuTreeByUser")
+	s = r.PathPrefix("/v1/menus").Subrouter()
+	s.HandleFunc("/", c.AllMenu).Methods("GET"); log.Println("/v1/menus GET AllMenu")
+	s.HandleFunc("/", c.NewMenu).Methods("POST"); log.Println("/v1/menus POST NewMenu")
+	s.HandleFunc("/tree", c.AllMenuTree).Methods("GET"); log.Println("/v1/menus/tree GET TreeMenu")
+	s.HandleFunc("/tree/users/{id:[0-9]+}", c.UserMenuTree).Methods("GET"); log.Println("/v1/menus/tree/users/:id GET FindMenuTreeByUser")
 	// Person
-	s = r.PathPrefix("/v1/person").Subrouter()
-	s.HandleFunc("/", c.AllPerson).Methods("GET")
-	log.Println("/v1/person GET AllPerson")
-	s.HandleFunc("/", c.NewPerson).Methods("POST")
-	log.Println("/v1/person POST NewPerson")
-	s.HandleFunc("/{id:[0-9]+}", c.ShowPerson).Methods("GET")
-	log.Println("/v1/person/:id GET ShowPerson")
+	s = r.PathPrefix("/v1/persons").Subrouter()
+	s.HandleFunc("/", c.AllPerson).Methods("GET"); log.Println("/v1/persons GET AllPerson")
+	s.HandleFunc("/", c.NewPerson).Methods("POST"); log.Println("/v1/persons POST NewPerson")
+	s.HandleFunc("/{id:[0-9]+}", c.ShowPerson).Methods("GET"); log.Println("/v1/persons/:id GET ShowPerson")
 
 	return r
 }

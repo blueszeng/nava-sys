@@ -29,9 +29,12 @@ func (e *Env) AllMenu(w http.ResponseWriter, r *http.Request) {
 }
 
 func (e *Env) NewMenu(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, http.StatusText(500), 500)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
-
 	m := m.Menu{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&m)

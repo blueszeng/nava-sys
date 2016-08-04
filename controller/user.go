@@ -48,7 +48,7 @@ func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
 
-	if r.Method != "PUT" {
+	if r.Method != "POST" {
 		http.Error(w, http.StatusText(500), 500)
 		return
 	}
@@ -187,7 +187,8 @@ func (e Env) DelUser(w http.ResponseWriter, r *http.Request){
 //  User Undelete Method
 func (e Env) UndelUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserUndelete() Method:", r.Method)
-	if r.Method != "PUT" {
+	if r.Method != "POST" +
+		"" {
 		http.Error(w, http.StatusText(500), 500)
 		return
 	}

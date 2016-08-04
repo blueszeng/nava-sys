@@ -10,20 +10,11 @@ import (
 // Base structure contains fields that are common to objects
 // returned by the nava's REST API.
 type Base struct {
-	ID      uint64         `json:"id"`
-	// Todo: Cheange datetype time.Time -> JsonNullTime
+	ID      uint64       `json:"id"`
 	Created JsonNullTime `json:"created"`
 	Updated JsonNullTime `json:"updated"`
 	Deleted JsonNullTime `json:"deleted"`
 }
-
-//func (b *Base) Delete(db *sql.DB) error {
-//	return nil
-//}
-
-// If record deleted Unique field can not be duplicated
-// Delete  bool           `json:"deleted"`
-// Status Status 	`json:"status"`
 
 type Status int
 const (

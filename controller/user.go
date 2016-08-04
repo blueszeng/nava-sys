@@ -36,7 +36,7 @@ func (e Env) ShowUser(w http.ResponseWriter, r *http.Request) {
 	} else {
 		rs.Status = "200"
 		rs.Message = "OK"
-		rs.Result = user
+		rs.Data = user
 	}
 	w.WriteHeader(http.StatusOK)
 	o, _ := json.Marshal(rs)
@@ -76,7 +76,7 @@ func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	} else {
 		rs.Status = "200"
 		rs.Message = "Update OK"
-		rs.Result = updateUser
+		rs.Data = updateUser
 	}
 	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
@@ -103,7 +103,7 @@ func (e *Env) AllUser(w http.ResponseWriter, r *http.Request) {
 	} else {
 		rs.Status = "200"
 		rs.Message = "OK"
-		rs.Result = users
+		rs.Data = users
 	}
 	output, err := json.Marshal(rs)
 	if err != nil {
@@ -148,7 +148,7 @@ func (e *Env) NewUser(w http.ResponseWriter, r *http.Request) {
 	} else {
 		rs.Status = "201"
 		rs.Message = "New user CREATED"
-		rs.Result = newUser
+		rs.Data = newUser
 	}
 	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
@@ -178,7 +178,7 @@ func (e Env) DelUser(w http.ResponseWriter, r *http.Request){
 	} else {
 		rs.Status = "200"
 		rs.Message = "DELETED OK"
-		rs.Result = u
+		rs.Data = u
 	}
 	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
@@ -208,7 +208,7 @@ func (e Env) UndelUser(w http.ResponseWriter, r *http.Request) {
 	} else {
 		rs.Status = "200"
 		rs.Message = "UNDELETED OK"
-		rs.Result = u
+		rs.Data = u
 	}
 	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
@@ -253,7 +253,7 @@ func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 		rs.Status = "200"
 		rs.Message = "LOGIN SUCCESS"
 		uData.Secret = nil
-		rs.Result = uData
+		rs.Data = uData
 	}
 	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
@@ -292,7 +292,7 @@ func (e Env) SearchUser(w http.ResponseWriter, r *http.Request) {
 	} else {
 		rs.Status = "302"
 		rs.Message = "FOUND"
-		rs.Result = users
+		rs.Data = users
 	}
 	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)

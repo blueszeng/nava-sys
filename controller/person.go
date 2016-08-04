@@ -33,7 +33,7 @@ func (e *Env) NewPerson(w http.ResponseWriter, r *http.Request) {
 	} else {
 		rs.Status = "201"
 		rs.Message = "NEW PERSON CREATED"
-		rs.Result = p
+		rs.Data = p
 	}
 	w.WriteHeader(http.StatusOK)
 	o, _ := json.Marshal(rs)
@@ -58,7 +58,7 @@ func (e *Env) AllPerson(w http.ResponseWriter, r *http.Request) {
 	} else {
 		rs.Status = "200"
 		rs.Message = "OK"
-		rs.Result = persons
+		rs.Data = persons
 	}
 	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
@@ -86,7 +86,7 @@ func (e *Env) ShowPerson(w http.ResponseWriter, r *http.Request) {
 	} else {
 		rs.Status = "200"
 		rs.Message = "OK"
-		rs.Result = person
+		rs.Data = person
 	}
 	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)

@@ -28,10 +28,10 @@ func (e *Env) NewPerson(w http.ResponseWriter, r *http.Request) {
 	err = p.New(e.DB)
 	rs := api.Response{}
 	if err != nil {
-		rs.Status = "300"
+		rs.Status = api.ERROR
 		rs.Message = err.Error()
 	} else {
-		rs.Status = "201"
+		rs.Status = api.SUCCESS
 		rs.Message = "NEW PERSON CREATED"
 		rs.Data = p
 	}
@@ -53,10 +53,10 @@ func (e *Env) AllPerson(w http.ResponseWriter, r *http.Request) {
 	rs := api.Response{}
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
-		rs.Status = "500"
+		rs.Status = api.ERROR
 		rs.Message = err.Error()
 	} else {
-		rs.Status = "200"
+		rs.Status = api.SUCCESS
 		rs.Message = "OK"
 		rs.Data = persons
 	}
@@ -81,10 +81,10 @@ func (e *Env) ShowPerson(w http.ResponseWriter, r *http.Request) {
 	}
 	rs := api.Response{}
 	if err != nil {
-		rs.Status = "204"
+		rs.Status = api.FAIL
 		rs.Message = "No Content: " + err.Error()
 	} else {
-		rs.Status = "200"
+		rs.Status = api.SUCCESS
 		rs.Message = "OK"
 		rs.Data = person
 	}

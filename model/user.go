@@ -20,7 +20,6 @@ type User struct {
 type Users []*User
 
 func (u *User) Show(db *sqlx.DB) (User, error) {
-	//var updated, deleted mysql.NullTime
 	sql := `
 	SELECT
 		id,

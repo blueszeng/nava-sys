@@ -17,34 +17,33 @@ type Config struct {
 	DBName string `json:"db_name"`
 	DBUser string `json:"db_user"`
 	DBPass string `json:"db_pass"`
-
 }
 
 func main() {
 	// Read configuration file from "config.json"
-	file, _ := os.Open("config.json")
-	decoder := json.NewDecoder(file)
-	config := Config{}
-	err := decoder.Decode(&config)
-	if err != nil {
-		log.Println("error:", err)
-	}
-
+	config := loadConfig()
 	var dsn = config.DBUser + ":" + config.DBPass + "@" + config.DBHost + "/" + config.DBName + "?parseTime=true"
-
 	// Create new DB connection pool
 	db, err := m.NewDB(dsn)
 	if err != nil {
 		log.Panic("NewDB() Error:", err)
 	}
-
-	c := &c.Env{DB: db}
 	defer db.Close()
-
+	c := &c.Env{DB: db}
 	r := SetupRouter(c)
-
 	http.Handle("/", r)
 	http.ListenAndServe(":8000", nil)
+}
+
+func loadConfig() *Config {
+	file, _ := os.Open("config.json")
+	decoder := json.NewDecoder(file)
+	config := new(Config)
+	err := decoder.Decode(&config)
+	if err != nil {
+		log.Println("error:", err)
+	}
+	return config
 }
 
 func SetupRouter(c *c.Env) *mux.Router{

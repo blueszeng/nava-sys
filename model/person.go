@@ -2,18 +2,18 @@ package model
 
 import (
 	"github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 	"log"
 	"time"
-	"github.com/jmoiron/sqlx"
 )
 
 type Person struct {
 	Base
-	First     JsonNullString    `json:"first"`
-	Last      JsonNullString    `json:"last"`
-	Nick      JsonNullString    `json:"nick"`
-	Sex       JsonNullString    `json:"sex"`
-	BirthDate time.Time `json:"birth_date" db:"birth_date"`
+	First     JsonNullString `json:"first"`
+	Last      JsonNullString `json:"last"`
+	Nick      JsonNullString `json:"nick"`
+	Sex       JsonNullString `json:"sex"`
+	BirthDate time.Time      `json:"birth_date" db:"birth_date"`
 }
 
 type Job struct {

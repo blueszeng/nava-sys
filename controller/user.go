@@ -31,12 +31,13 @@ func (e Env) ShowUser(w http.ResponseWriter, r *http.Request) {
 
 	rs := api.Response{}
 	if err != nil {
-		rs.Status = "204"
+		rs.Status = api.ERROR
 		rs.Message = "No Content: " + err.Error()
 	} else {
-		rs.Status = "200"
+		rs.Status = api.SUCCESS
 		rs.Message = "OK"
 		rs.Data = user
+		//rs.Link.Self = host + version + "/users"
 	}
 	w.WriteHeader(http.StatusOK)
 	o, _ := json.Marshal(rs)
@@ -70,11 +71,11 @@ func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	rs := api.Response{}
 	if err != nil {
-		rs.Status = "304"
+		rs.Status = api.ERROR
 		rs.Message = "Not Modified: " + err.Error()
 		//rs.Result = updateUser
 	} else {
-		rs.Status = "200"
+		rs.Status = api.SUCCESS
 		rs.Message = "Update OK"
 		rs.Data = updateUser
 	}
@@ -98,10 +99,10 @@ func (e *Env) AllUser(w http.ResponseWriter, r *http.Request) {
 	rs := api.Response{}
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
-		rs.Status = "500xxx"
+		rs.Status = api.ERROR
 		rs.Message = err.Error()
 	} else {
-		rs.Status = "200"
+		rs.Status = api.SUCCESS
 		rs.Message = "OK"
 		rs.Data = users
 	}
@@ -143,10 +144,10 @@ func (e *Env) NewUser(w http.ResponseWriter, r *http.Request) {
 	rs := api.Response{}
 	if err != nil {
 		// reply error message with JSON
-		rs.Status = "300"
+		rs.Status = api.ERROR
 		rs.Message = err.Error()
 	} else {
-		rs.Status = "201"
+		rs.Status = api.SUCCESS
 		rs.Message = "New user CREATED"
 		rs.Data = newUser
 	}
@@ -173,10 +174,10 @@ func (e Env) DelUser(w http.ResponseWriter, r *http.Request){
 	u, err := u.Del(e.DB)
 	rs := api.Response{}
 	if err != nil {
-		rs.Status = "304"
+		rs.Status = api.ERROR
 		rs.Message = "Not Modified: " + err.Error()
 	} else {
-		rs.Status = "200"
+		rs.Status = api.SUCCESS
 		rs.Message = "DELETED OK"
 		rs.Data = u
 	}
@@ -203,10 +204,10 @@ func (e Env) UndelUser(w http.ResponseWriter, r *http.Request) {
 	u, err := u.Undel(e.DB)
 	rs := api.Response{}
 	if err != nil {
-		rs.Status = "304"
+		rs.Status = api.ERROR
 		rs.Message = "Not Modified" + err.Error()
 	} else {
-		rs.Status = "200"
+		rs.Status = api.SUCCESS
 		rs.Message = "UNDELETED OK"
 		rs.Data = u
 	}
@@ -246,11 +247,11 @@ func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 	rs := api.Response{}
 	if err != nil {
 		log.Println(err)
-		rs.Status = "Error"
+		rs.Status = api.ERROR
 		rs.Message = err.Error()
 	} else {
 		log.Println("Verify Password PASS!!")
-		rs.Status = "200"
+		rs.Status = api.SUCCESS
 		rs.Message = "LOGIN SUCCESS"
 		uData.Secret = nil
 		rs.Data = uData
@@ -287,10 +288,10 @@ func (e Env) SearchUser(w http.ResponseWriter, r *http.Request) {
 	}
 	rs := api.Response{}
 	if users == nil {
-		rs.Status = "404"
+		rs.Status = api.ERROR
 		rs.Message = "NOT_FOUND ==>" + err.Error()
 	} else {
-		rs.Status = "302"
+		rs.Status = api.SUCCESS
 		rs.Message = "FOUND"
 		rs.Data = users
 	}

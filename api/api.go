@@ -3,16 +3,16 @@ package api
 type ResponseStatus int
 
 const (
-	success ResponseStatus = 1 + iota
-	fail
-	error
+	SUCCESS ResponseStatus = iota
+	FAIL
+	ERROR
 )
 
 type Response struct {
 	Status  ResponseStatus `json:"status"`
 	Message string         `json:"message"`
 	Data    interface{}    `json:"data"`
-	Link    Link `json:"links"`
+	Link    Link           `json:"links"`
 }
 
 type Link struct {

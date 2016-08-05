@@ -1,8 +1,8 @@
 package api
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"strings"
 )
 
@@ -18,7 +18,7 @@ type Response struct {
 	Status  ResponseStatus `json:"status"`
 	Message string         `json:"message,omitempty"`
 	Data    interface{}    `json:"data,omitempty"`
-	Link    Link           `json:"links,omitempty"`
+	Link    Link `json:"links,omitempty"`
 }
 
 type Link struct {
@@ -36,8 +36,8 @@ type Search struct {
 func (rs ResponseStatus) MarshalJSON() ([]byte, error) {
 	statusString, ok := map[ResponseStatus]string{
 		SUCCESS: "success",
-		FAIL: "fail",
-		ERROR: "error",
+		FAIL:    "fail",
+		ERROR:   "error",
 	}[rs]
 	if !ok {
 		return nil, fmt.Errorf("invalid ResponseStatus value %v", rs)
@@ -56,8 +56,8 @@ func (rs *ResponseStatus) UnmarshalJSON(data []byte) error {
 	s = strings.ToLower(s)
 	statusENUM, ok := map[string]ResponseStatus{
 		"success": SUCCESS,
-		"fail": FAIL,
-		"error": ERROR,
+		"fail":    FAIL,
+		"error":   ERROR,
 	}[s]
 	if !ok {
 		return fmt.Errorf("invalid Response Status %q", s)

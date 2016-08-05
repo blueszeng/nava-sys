@@ -32,7 +32,6 @@ func (e *Env) NewPerson(w http.ResponseWriter, r *http.Request) {
 		rs.Message = err.Error()
 	} else {
 		rs.Status = api.SUCCESS
-		rs.Message = "NEW PERSON CREATED"
 		rs.Data = p
 	}
 	w.WriteHeader(http.StatusOK)
@@ -57,7 +56,6 @@ func (e *Env) AllPerson(w http.ResponseWriter, r *http.Request) {
 		rs.Message = err.Error()
 	} else {
 		rs.Status = api.SUCCESS
-		rs.Message = "OK"
 		rs.Data = persons
 	}
 	w.WriteHeader(http.StatusOK)
@@ -85,7 +83,6 @@ func (e *Env) ShowPerson(w http.ResponseWriter, r *http.Request) {
 		rs.Message = "No Content: " + err.Error()
 	} else {
 		rs.Status = api.SUCCESS
-		rs.Message = "OK"
 		rs.Data = person
 	}
 	w.WriteHeader(http.StatusOK)

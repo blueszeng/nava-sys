@@ -87,6 +87,7 @@ func (e *Env) UserMenuTree(w http.ResponseWriter, r *http.Request) {
 	menus, err := u.Menus(e.DB)
 	if err != nil {
 		log.Fatal("Error call u.FindMenuByUser()", err)
+		w.WriteHeader(http.StatusNotFound)
 	}
 
 	tree := CreateMenuTree(menus)

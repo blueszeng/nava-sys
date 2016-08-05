@@ -13,8 +13,8 @@ import (
 type User struct {
 	Base
 	Name     string `json:"name"`
-	Password string `json:"password"` // just for receive JSON plain-text password but not store in DB
-	Secret   []byte
+	Password string `json:"password,omitempty"` // just for receive JSON plain-text password but not store in DB
+	Secret   []byte `json:"-"`
 }
 
 type Users []*User

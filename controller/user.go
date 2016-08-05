@@ -35,7 +35,6 @@ func (e Env) ShowUser(w http.ResponseWriter, r *http.Request) {
 		rs.Message = "No Content: " + err.Error()
 	} else {
 		rs.Status = api.SUCCESS
-		rs.Message = "OK"
 		rs.Data = user
 		//rs.Link.Self = host + version + "/users"
 	}
@@ -73,10 +72,8 @@ func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		rs.Status = api.ERROR
 		rs.Message = "Not Modified: " + err.Error()
-		//rs.Result = updateUser
 	} else {
 		rs.Status = api.SUCCESS
-		rs.Message = "Update OK"
 		rs.Data = updateUser
 	}
 	w.WriteHeader(http.StatusOK)
@@ -93,7 +90,6 @@ func (e *Env) AllUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
 
-
 	u := m.User{}
 	users, err := u.All(e.DB)
 	rs := api.Response{}
@@ -103,7 +99,6 @@ func (e *Env) AllUser(w http.ResponseWriter, r *http.Request) {
 		rs.Message = err.Error()
 	} else {
 		rs.Status = api.SUCCESS
-		rs.Message = "OK"
 		rs.Data = users
 	}
 	output, err := json.Marshal(rs)
@@ -148,7 +143,6 @@ func (e *Env) NewUser(w http.ResponseWriter, r *http.Request) {
 		rs.Message = err.Error()
 	} else {
 		rs.Status = api.SUCCESS
-		rs.Message = "New user CREATED"
 		rs.Data = newUser
 	}
 	w.WriteHeader(http.StatusOK)
@@ -178,7 +172,6 @@ func (e Env) DelUser(w http.ResponseWriter, r *http.Request){
 		rs.Message = "Not Modified: " + err.Error()
 	} else {
 		rs.Status = api.SUCCESS
-		rs.Message = "DELETED OK"
 		rs.Data = u
 	}
 	w.WriteHeader(http.StatusOK)
@@ -208,7 +201,6 @@ func (e Env) UndelUser(w http.ResponseWriter, r *http.Request) {
 		rs.Message = "Not Modified" + err.Error()
 	} else {
 		rs.Status = api.SUCCESS
-		rs.Message = "UNDELETED OK"
 		rs.Data = u
 	}
 	w.WriteHeader(http.StatusOK)
@@ -252,9 +244,9 @@ func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 	} else {
 		log.Println("Verify Password PASS!!")
 		rs.Status = api.SUCCESS
-		//rs.Message = "LOGIN SUCCESS!"
 		uData.Secret = nil
 		rs.Data = uData
+		rs.Link.Related = "http://api.nava.work:8000/user/dashboard"
 	}
 	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
@@ -292,7 +284,6 @@ func (e Env) SearchUser(w http.ResponseWriter, r *http.Request) {
 		rs.Message = "NOT_FOUND ==>" + err.Error()
 	} else {
 		rs.Status = api.SUCCESS
-		rs.Message = "FOUND"
 		rs.Data = users
 	}
 	w.WriteHeader(http.StatusOK)

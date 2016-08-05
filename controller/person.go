@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 	"encoding/json"
-	m "github.com/mrtomyum/nava-api3/model"
-	"github.com/mrtomyum/nava-api3/api"
+	m "github.com/mrtomyum/nava-sys/model"
+	"github.com/mrtomyum/nava-sys/api"
 	"github.com/gorilla/mux"
 	"strconv"
 )

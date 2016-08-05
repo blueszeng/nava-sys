@@ -121,31 +121,23 @@ func (u *User) Update(db *sqlx.DB) (*User, error) {
 	}
 	log.Println("existUser: ", existUser)
 
-	now := time.Now()
-	now.Format(time.RFC3339) // make Time Format fit to MariaDB.DateTime
-	log.Println("Check: t := datetime: ", now)
 	if u.Password == "" { // Check if INPUT u.password is BLANK: So, user don't need to change password
-		s = `UPDATE user
-			SET
-			name= ?,
-			updated=?
+		s = `UPDATE user SET
+				name= ?
 			WHERE id=?`
 		_, err = db.Exec(s,
 			u.Name,
-			now,
 			existUser.ID,
 		)
 	} else {
 		u.SetPass()
 		s = `UPDATE user SET
 				name= ?,
-				secret= ?,
-				updated=?
+				secret= ?
 			WHERE id =?`
 		_, err = db.Exec(s,
 			u.Name,
 			u.Secret,
-			now,
 			existUser.ID,
 		)
 	}

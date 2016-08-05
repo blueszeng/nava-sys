@@ -3,8 +3,8 @@ package main
 import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
-	c "github.com/mrtomyum/nava-api3/controller"
-	m "github.com/mrtomyum/nava-api3/model"
+	c "github.com/mrtomyum/nava-sys/controller"
+	m "github.com/mrtomyum/nava-sys/model"
 	"log"
 	"net/http"
 	"os"

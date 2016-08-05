@@ -8,8 +8,8 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	m "github.com/mrtomyum/nava-api3/model"
-	"github.com/mrtomyum/nava-api3/api"
+	m "github.com/mrtomyum/nava-sys/model"
+	"github.com/mrtomyum/nava-sys/api"
 )
 
 // Method UserShow to query 1 row of user match u.id

@@ -252,7 +252,7 @@ func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 	} else {
 		log.Println("Verify Password PASS!!")
 		rs.Status = api.SUCCESS
-		rs.Message = "LOGIN SUCCESS"
+		//rs.Message = "LOGIN SUCCESS!"
 		uData.Secret = nil
 		rs.Data = uData
 	}

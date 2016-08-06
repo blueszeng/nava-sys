@@ -7,7 +7,6 @@ import (
 )
 
 type ResponseStatus int
-
 const (
 	SUCCESS ResponseStatus = iota
 	FAIL

@@ -33,12 +33,13 @@ func (e Env) ShowUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		rs.Status = api.ERROR
 		rs.Message = "No Content: " + err.Error()
+		w.WriteHeader(http.StatusNotFound)
 	} else {
 		rs.Status = api.SUCCESS
 		rs.Data = user
 		//rs.Link.Self = host + version + "/users"
+		w.WriteHeader(http.StatusOK)
 	}
-	w.WriteHeader(http.StatusOK)
 	o, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s", string(o))
 }
@@ -72,11 +73,12 @@ func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		rs.Status = api.ERROR
 		rs.Message = "Not Modified: " + err.Error()
+		w.WriteHeader(http.StatusNotModified)
 	} else {
 		rs.Status = api.SUCCESS
 		rs.Data = updateUser
+		w.WriteHeader(http.StatusOK)
 	}
-	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s", string(output))
 }
@@ -97,9 +99,11 @@ func (e *Env) AllUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(500), 500)
 		rs.Status = api.ERROR
 		rs.Message = err.Error()
+		w.WriteHeader(http.StatusNotFound)
 	} else {
 		rs.Status = api.SUCCESS
 		rs.Data = users
+		w.WriteHeader(http.StatusOK)
 	}
 	output, err := json.Marshal(rs)
 	if err != nil {
@@ -141,11 +145,12 @@ func (e *Env) NewUser(w http.ResponseWriter, r *http.Request) {
 		// reply error message with JSON
 		rs.Status = api.ERROR
 		rs.Message = err.Error()
+		w.WriteHeader(http.StatusNotImplemented)
 	} else {
 		rs.Status = api.SUCCESS
 		rs.Data = newUser
+		w.WriteHeader(http.StatusOK)
 	}
-	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s" ,string(output))
 }
@@ -170,11 +175,12 @@ func (e Env) DelUser(w http.ResponseWriter, r *http.Request){
 	if err != nil {
 		rs.Status = api.ERROR
 		rs.Message = "Not Modified: " + err.Error()
+		w.WriteHeader(http.StatusNotModified)
 	} else {
 		rs.Status = api.SUCCESS
 		rs.Data = u
+		w.WriteHeader(http.StatusOK)
 	}
-	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s", string(output))
 }
@@ -199,11 +205,12 @@ func (e Env) UndelUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		rs.Status = api.ERROR
 		rs.Message = "Not Modified" + err.Error()
+		w.WriteHeader(http.StatusNotModified)
 	} else {
 		rs.Status = api.SUCCESS
 		rs.Data = u
+		w.WriteHeader(http.StatusOK)
 	}
-	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s",string(output))
 
@@ -241,14 +248,15 @@ func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		rs.Status = api.ERROR
 		rs.Message = err.Error()
+		w.WriteHeader(http.StatusUnauthorized)
 	} else {
 		log.Println("Verify Password PASS!!")
 		rs.Status = api.SUCCESS
 		uData.Secret = nil
 		rs.Data = uData
 		rs.Link.Related = "http://api.nava.work:8000/user/dashboard"
+		w.WriteHeader(http.StatusOK)
 	}
-	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s", string(output))
 }
@@ -282,11 +290,12 @@ func (e Env) SearchUser(w http.ResponseWriter, r *http.Request) {
 	if users == nil {
 		rs.Status = api.ERROR
 		rs.Message = "NOT_FOUND ==>" + err.Error()
+		w.WriteHeader(http.StatusNotFound)
 	} else {
 		rs.Status = api.SUCCESS
 		rs.Data = users
+		w.WriteHeader(http.StatusOK)
 	}
-	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s", string(output))
 }

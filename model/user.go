@@ -79,7 +79,8 @@ func (u *User) All(db *sqlx.DB) ([]*User, error) {
 // Insert New User
 func (u *User) New(db *sqlx.DB) (*User, error) {
 	log.Println(">>start User.New() method")
-	rs, err := db.Exec(
+	log.Println("Test User receiver:", u.Name)
+	rsp, err := db.Exec(
 		"INSERT INTO user (name, secret) VALUES(?, ?)",
 		u.Name,
 		u.Secret,
@@ -88,19 +89,24 @@ func (u *User) New(db *sqlx.DB) (*User, error) {
 		log.Println(">>>Error cannot exec INSERT User: >>>", err)
 		return nil, err
 	}
-	lastID, _ := rs.LastInsertId()
+	lastID, err := rsp.LastInsertId()
+	if err != nil {
+		log.Println("Error in rsp.LastInsertId", err)
+	}
+	log.Println("LastInsertId=", lastID)
 	// test query data
-	n := new(User)
-	err = db.Get(&n, "SELECT id, name, created FROM user WHERE id = ?", lastID)
+	newUser := User{}
+	err = db.Get(&newUser, "SELECT * FROM user WHERE id = ?", lastID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Println("Error not found: ", err)
 		} else {
 			log.Println(err)
 		}
+		return nil, err
 	}
-	log.Println("Success insert record: ", n)
-	return n, nil
+	log.Println("Success insert record: ", newUser)
+	return &newUser, nil
 }
 
 // UpdateUser by id

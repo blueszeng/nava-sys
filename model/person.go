@@ -9,9 +9,9 @@ import (
 
 type Person struct {
 	Base
-	First     JsonNullString `json:"first"`
-	Last      JsonNullString `json:"last"`
-	Nick      JsonNullString `json:"nick"`
+	First     string `json:"first"`
+	Last      string `json:"last"`
+	Nick      JsonNullString `json:"nick"` //Todo: Problem JsonNullString got null value from Insert SQL!!
 	Sex       JsonNullString `json:"sex"`
 	BirthDate time.Time      `json:"birth_date" db:"birth_date"`
 }

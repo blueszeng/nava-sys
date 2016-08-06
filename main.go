@@ -50,7 +50,8 @@ func SetupRouter(c *c.Env) *mux.Router{
 	// แก้ปัญหา"/" ปิดท้าย URI แล้ว 404 page not found
 	// .StrictSlash(true) help ignore last "/" in URI
 	r := mux.NewRouter().StrictSlash(true)
-	r.HandleFunc("/v1/users/", c.NewUser).Methods("POST")
+	r.HandleFunc("/v1/users", c.NewUser).Methods("POST")
+	r.HandleFunc("/v1/persons", c.NewPerson).Methods("POST")
 	// User
 	s := r.PathPrefix("/v1/users").Subrouter()
 	s.HandleFunc("/", c.AllUser).Methods("GET"); log.Println("/v1/users GET AllUser");
@@ -70,7 +71,7 @@ func SetupRouter(c *c.Env) *mux.Router{
 	// Person
 	s = r.PathPrefix("/v1/persons").Subrouter()
 	s.HandleFunc("/", c.AllPerson).Methods("GET"); log.Println("/v1/persons GET AllPerson")
-	s.HandleFunc("/", c.NewPerson).Methods("POST"); log.Println("/v1/persons POST NewPerson")
+	//s.HandleFunc("/", c.NewPerson).Methods("POST"); log.Println("/v1/persons POST NewPerson")
 	s.HandleFunc("/{id:[0-9]+}", c.ShowPerson).Methods("GET"); log.Println("/v1/persons/:id GET ShowPerson")
 
 	return r

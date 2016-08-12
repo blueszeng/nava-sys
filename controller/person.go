@@ -25,6 +25,7 @@ func (e *Env) NewPerson(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error decode NewPerson request body>>", err)
 	}
+	log.Println(p.Nick, p.Sex)
 	err = p.New(e.DB)
 	rs := api.Response{}
 	if err != nil {

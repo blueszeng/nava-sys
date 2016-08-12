@@ -1,19 +1,19 @@
 package model
 
 import (
-	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"log"
 	"time"
+	"github.com/guregu/null"
 )
 
 type Person struct {
 	Base
-	First     string `json:"first"`
-	Last      string `json:"last"`
-	Nick      JsonNullString `json:"nick"` //Todo: Problem JsonNullString got null value from Insert SQL!!
-	Sex       JsonNullString `json:"sex"`
-	BirthDate time.Time      `json:"birth_date" db:"birth_date"`
+	First     string         `json:"first"`
+	Last      string         `json:"last"`
+	Nick      null.String  `json:"nick" db:"nick"`
+	Sex       null.String `json:"sex" db:"sex"`
+	BirthDate *time.Time   `json:"birth_date" db:"birth_date"`
 }
 
 type Job struct {
@@ -31,7 +31,7 @@ type Org struct {
 func (p *Person) New(db *sqlx.DB) error {
 	log.Println("run models.Person.New method from:", p)
 
-	birthDate := p.BirthDate.Format(time.RFC3339)
+	//birthDate := p.BirthDate.Format(time.RFC3339)
 	sql := `INSERT INTO person (
 		first,
 		last,
@@ -40,36 +40,37 @@ func (p *Person) New(db *sqlx.DB) error {
 		birth_date
 	)
 	VALUES (?,?,?,?,?)`
+
 	res, err := db.Exec(sql,
 		p.First,
 		p.Last,
-		p.Nick,
-		p.Sex,
-		birthDate,
+		p.Nick.String,
+		p.Sex.String,
+		p.BirthDate,
 	)
 	if err != nil {
 		log.Println("Error insert into person...:", err)
 		return err
 	}
 	id, _ := res.LastInsertId()
-	var date mysql.NullTime
+	//var date mysql.NullTime
 	sql = `SELECT id, created, first, last, nick, sex, birth_date FROM person WHERE id = ?`
-	err = db.QueryRow(sql, id).Scan(
+	err = db.QueryRowx(sql, id).Scan(
 		&p.ID,
 		&p.Created,
 		&p.First,
 		&p.Last,
 		&p.Nick,
 		&p.Sex,
-		&date,
+		&p.BirthDate,
 	)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	if date.Valid {
-		p.BirthDate = date.Time
-	}
+	//if date.Valid {
+	//	p.BirthDate = date.Time
+	//}
 	return nil
 }
 

@@ -71,7 +71,7 @@ func (e *Env) AllMenuTree(w http.ResponseWriter, r *http.Request) {
 }
 
 func (e *Env) UserMenuTree(w http.ResponseWriter, r *http.Request) {
-	log.Println("FindMenuByUser()...")
+	log.Println("UsrMenuTree()...")
 	if r.Method != "GET"{
 		http.Error(w, http.StatusText(500), 500)
 		return

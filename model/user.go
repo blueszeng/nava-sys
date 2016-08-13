@@ -246,6 +246,7 @@ func (u *User) Undel(db *sqlx.DB) (*User, error) {
 }
 
 func (u *User) Menus(db *sqlx.DB) ([]*Menu, error) {
+	log.Println("call model.User.Menus")
 	s := `
 	SELECT
 		menu.*

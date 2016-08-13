@@ -19,28 +19,6 @@ type Menu struct {
 
 type Menus []*Menu
 
-type Role struct {
-	ID uint64 `json:"id"`
-	TH string `json:"th"`
-	EN string `json:"en"`
-}
-
-type UserRole struct {
-	ID     uint64 `json:"id"`
-	UserID uint64 `json:"user_id" db:"user_id"`
-	RoleID uint64 `json:"role_id" db:"role_id"`
-}
-
-type RoleMenu struct {
-	RoleID     uint64 `json:"role_id" db:"role_id"`
-	MenuID     uint64 `json:"menu_id" db:"menu_id"`
-	CanRead    bool   `json:"can_read" db:"can_read"`
-	CanWrite   bool   `json:"can_write" db:"can_write"`
-	CanDelete  bool   `json:"can_delete" db:"can_delete"`
-	CanApprove bool   `json:"can_approve" db:"can_approve"`
-	CanCancel  bool   `json:"can_cancel" db:"can_cancel"`
-}
-
 func (m *Menu) All(db *sqlx.DB) ([]*Menu, error) {
 	var menus Menus
 	err := db.Select(&menus, `SELECT * FROM menu`)

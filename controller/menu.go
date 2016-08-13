@@ -71,11 +71,11 @@ func (e *Env) AllMenuTree(w http.ResponseWriter, r *http.Request) {
 }
 
 func (e *Env) UserMenuTree(w http.ResponseWriter, r *http.Request) {
-	log.Println("UsrMenuTree()...")
-	if r.Method != "GET"{
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
+	log.Println("UserMenuTree()...")
+	//if r.Method != "GET"{
+	//	http.Error(w, http.StatusText(500), 500)
+	//	return
+	//}
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
@@ -90,8 +90,9 @@ func (e *Env) UserMenuTree(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	}
 
+	log.Println(menus)
 	tree := CreateMenuTree(menus)
-
+	log.Println(tree)
 	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(tree.Child)
 	fmt.Fprintf(w, string(output))

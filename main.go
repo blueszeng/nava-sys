@@ -62,6 +62,10 @@ func SetupRouter(c *c.Env) *mux.Router{
 	s.HandleFunc("/login", c.LoginUser).Methods("POST"); log.Println("/v1/login POST UserLogin")
 	s.HandleFunc("/{id:[0-9]+}", c.DelUser).Methods("DELETE"); log.Println("/v1/users/:id DELETE UserDelete")
 	s.HandleFunc("/{id:[0-9]+}/undel", c.UndelUser).Methods("POST"); log.Println("/v1/users/:id/undel PUT UserUndelete")
+
+	// Role
+	s = r.PathPrefix("/v1/roles").Subrouter()
+	s.HandleFunc("/", c.AllRole).Methods("GET"); log.Println("/v1/role")
 	// Menu
 	s = r.PathPrefix("/v1/menus").Subrouter()
 	s.HandleFunc("/", c.AllMenu).Methods("GET"); log.Println("/v1/menus GET AllMenu")

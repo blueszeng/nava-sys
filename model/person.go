@@ -1,19 +1,19 @@
 package model
 
 import (
+	"github.com/guregu/null"
 	"github.com/jmoiron/sqlx"
 	"log"
 	"time"
-	"github.com/guregu/null"
 )
 
 type Person struct {
 	Base
-	First     string         `json:"first"`
-	Last      string         `json:"last"`
-	Nick      null.String  `json:"nick" db:"nick"`
+	First     string      `json:"first"`
+	Last      string      `json:"last"`
+	Nick      null.String `json:"nick" db:"nick"`
 	Sex       null.String `json:"sex" db:"sex"`
-	BirthDate *time.Time   `json:"birth_date" db:"birth_date"`
+	BirthDate *time.Time  `json:"birth_date" db:"birth_date"`
 }
 
 type Job struct {

@@ -8,6 +8,16 @@ import (
 	"time"
 )
 
+type Status int
+
+const (
+	DRAFT Status = iota // ฉบับร่าง ค่า int = 0
+	OPEN // เอกสารบันทึกเข้าระบบงานแล้ว ยังสามารถแก้ไขได้
+	HOLD // เอกสารถูกพักรอดำเนินการ
+	POST // เอกสารถูกบันทึกบัญชีแล้ว ห้ามแก้ไข
+	CANCEL // เอกสารถูกยกเลิกแล้ว ห้ามแก้ไข
+)
+
 // Base structure contains fields that are common to objects
 // returned by the nava's REST API.
 type Base struct {
@@ -17,13 +27,13 @@ type Base struct {
 	Deleted JsonNullTime `json:"deleted"`
 }
 
-type Status int
-
-//const (
-//	ACTIVE Status = 1 + iota
-//	HOLD
-//	SUSPEND
-//)
+type Doc struct {
+	CreatedBy  User
+	UpdatedBy  User
+	ApprovedBy User
+	CanceledBy User
+	DeletedBy  User
+}
 
 type JsonNullTime struct {
 	mysql.NullTime

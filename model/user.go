@@ -19,7 +19,7 @@ type User struct {
 
 type Users []*User
 
-func (u *User) Show(db *sqlx.DB) (User, error) {
+func (u *User) Get(db *sqlx.DB) (User, error) {
 	sql := `
 	SELECT
 		id,

@@ -13,7 +13,7 @@ import (
 )
 
 // Method UserShow to query 1 row of user match u.id
-func (e Env) UserShow(w http.ResponseWriter, r *http.Request) {
+func (e Env) GetUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserShow()")
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
@@ -27,7 +27,7 @@ func (e Env) UserShow(w http.ResponseWriter, r *http.Request) {
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
 	log.Println("Print u.ID", id)
 
-	user, err := u.Show(e.DB)
+	user, err := u.Get(e.DB)
 
 	rs := api.Response{}
 	if err != nil {
@@ -44,7 +44,7 @@ func (e Env) UserShow(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", string(o))
 }
 
-func (e Env) UserUpdate(w http.ResponseWriter, r *http.Request) {
+func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call PUT UserUpdate()")
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
@@ -83,7 +83,7 @@ func (e Env) UserUpdate(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", string(output))
 }
 
-func (e *Env) UserAll(w http.ResponseWriter, r *http.Request) {
+func (e *Env) AllUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET All User()")
 	if r.Method != "GET" {
 		http.Error(w, http.StatusText(500), 500)
@@ -112,7 +112,7 @@ func (e *Env) UserAll(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", string(output))
 }
 
-func (e *Env) UserNew(w http.ResponseWriter, r *http.Request) {
+func (e *Env) NewUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call POST UserAdd()")
 	log.Println("Request Body:", r.Body)
 	w.Header().Set("Content-Type", "application/json")
@@ -156,7 +156,7 @@ func (e *Env) UserNew(w http.ResponseWriter, r *http.Request) {
 }
 
 // UserDelete Method to mark deleted by field User.DeletedAt.Valid == true
-func (e Env) UserDel(w http.ResponseWriter, r *http.Request){
+func (e Env) DeleteUser(w http.ResponseWriter, r *http.Request){
 	log.Println("call GET UserDelete() Method:", r.Method)
 	if r.Method != "DELETE" {
 		http.Error(w, http.StatusText(500), 500)
@@ -185,7 +185,7 @@ func (e Env) UserDel(w http.ResponseWriter, r *http.Request){
 	fmt.Fprintf(w, "%s", string(output))
 }
 //  User Undelete Method
-func (e Env) UserUndel(w http.ResponseWriter, r *http.Request) {
+func (e Env) UndeleteUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserUndelete() Method:", r.Method)
 	if r.Method != "POST" +
 		"" {
@@ -216,7 +216,7 @@ func (e Env) UserUndel(w http.ResponseWriter, r *http.Request) {
 
 }
 // Login Endpoint
-func (e Env) UserLogin(w http.ResponseWriter, r *http.Request) {
+func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call POST Login()")
 	if r.Method != "POST" {
 		http.Error(w, http.StatusText(500), 500)
@@ -260,7 +260,7 @@ func (e Env) UserLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 // UserSearch Method output JSON user.id for client use id as parameter in UserUpdate
-func (e Env) UserSearch(w http.ResponseWriter, r *http.Request) {
+func (e Env) SearchUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserSearch() Method:", r.Method)
 
 	if r.Method != "POST" {

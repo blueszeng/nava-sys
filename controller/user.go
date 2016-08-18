@@ -13,7 +13,7 @@ import (
 )
 
 // Method UserShow to query 1 row of user match u.id
-func (e Env) ShowUser(w http.ResponseWriter, r *http.Request) {
+func (e Env) UserShow(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserShow()")
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
@@ -44,7 +44,7 @@ func (e Env) ShowUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", string(o))
 }
 
-func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
+func (e Env) UserUpdate(w http.ResponseWriter, r *http.Request) {
 	log.Println("call PUT UserUpdate()")
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
@@ -83,7 +83,7 @@ func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", string(output))
 }
 
-func (e *Env) AllUser(w http.ResponseWriter, r *http.Request) {
+func (e *Env) UserAll(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET All User()")
 	if r.Method != "GET" {
 		http.Error(w, http.StatusText(500), 500)
@@ -112,7 +112,7 @@ func (e *Env) AllUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", string(output))
 }
 
-func (e *Env) NewUser(w http.ResponseWriter, r *http.Request) {
+func (e *Env) UserNew(w http.ResponseWriter, r *http.Request) {
 	log.Println("call POST UserAdd()")
 	log.Println("Request Body:", r.Body)
 	w.Header().Set("Content-Type", "application/json")
@@ -156,7 +156,7 @@ func (e *Env) NewUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // UserDelete Method to mark deleted by field User.DeletedAt.Valid == true
-func (e Env) DelUser(w http.ResponseWriter, r *http.Request){
+func (e Env) UserDel(w http.ResponseWriter, r *http.Request){
 	log.Println("call GET UserDelete() Method:", r.Method)
 	if r.Method != "DELETE" {
 		http.Error(w, http.StatusText(500), 500)
@@ -185,7 +185,7 @@ func (e Env) DelUser(w http.ResponseWriter, r *http.Request){
 	fmt.Fprintf(w, "%s", string(output))
 }
 //  User Undelete Method
-func (e Env) UndelUser(w http.ResponseWriter, r *http.Request) {
+func (e Env) UserUndel(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserUndelete() Method:", r.Method)
 	if r.Method != "POST" +
 		"" {
@@ -216,7 +216,7 @@ func (e Env) UndelUser(w http.ResponseWriter, r *http.Request) {
 
 }
 // Login Endpoint
-func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
+func (e Env) UserLogin(w http.ResponseWriter, r *http.Request) {
 	log.Println("call POST Login()")
 	if r.Method != "POST" {
 		http.Error(w, http.StatusText(500), 500)
@@ -225,24 +225,17 @@ func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
 
-	var uLogin m.User
+	var loginUser m.User
 	decode := json.NewDecoder(r.Body)
-	err := decode.Decode(&uLogin)
+	err := decode.Decode(&loginUser)
 	if err != nil {
 		log.Println("Error decode.Decode(&u) >>", err)
 	}
-	log.Println("Success decode JSON -> :", uLogin, " Result user decoded -> ", uLogin)
-
-	// Read User.ID, User.Secret by User.Name from DB
-	uData, err := uLogin.FindByName(e.DB)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println("u.SearchByName--> user = ", uData)
-
+	log.Println("Success decode JSON -> :", loginUser, " Result user decoded -> ", loginUser)
 	// Verify Password
-	log.Println ("u.Password:", uLogin.Password)
-	err = uData.VerifyPass(uLogin.Password)
+	foundUser, err := loginUser.FindByName(e.DB)
+	err = foundUser.VerifyPass(loginUser.Password)
+	log.Println ("Check Password:", loginUser.Password)
 	rs := api.Response{}
 	if err != nil {
 		log.Println(err)
@@ -250,10 +243,14 @@ func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 		rs.Message = err.Error()
 		w.WriteHeader(http.StatusUnauthorized)
 	} else {
-		log.Println("Verify Password PASS!!")
+		// Make UserPermission for response
+		p, err := foundUser.Permission(e.DB)
+		if err != nil {
+			log.Println("Error from call user.Permission()", err)
+		}
+		log.Println("User Permission: ", p)
 		rs.Status = api.SUCCESS
-		uData.Secret = nil
-		rs.Data = uData
+		rs.Data = p
 		rs.Link.Related = "http://api.nava.work:8000/user/dashboard"
 		w.WriteHeader(http.StatusOK)
 	}
@@ -262,7 +259,7 @@ func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // UserSearch Method output JSON user.id for client use id as parameter in UserUpdate
-func (e Env) SearchUser(w http.ResponseWriter, r *http.Request) {
+func (e Env) UserSearch(w http.ResponseWriter, r *http.Request) {
 	log.Println("call GET UserSearch() Method:", r.Method)
 
 	if r.Method != "POST" {

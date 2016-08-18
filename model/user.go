@@ -3,11 +3,11 @@ package model
 import (
 	"database/sql"
 	"errors"
+	"github.com/jmoiron/sqlx"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"strings"
 	"time"
-	"github.com/jmoiron/sqlx"
 )
 
 type User struct {
@@ -154,7 +154,7 @@ func (u *User) Update(db *sqlx.DB) (*User, error) {
 
 	// db.QueryRow to check if correct update record
 	n := User{}
-	s =`SELECT *
+	s = `SELECT *
 		FROM user
 		WHERE id =?`
 	err = db.Get(&n, s, existUser.ID)
@@ -178,7 +178,7 @@ func (u *User) SetPass() error {
 
 func (u *User) VerifyPass(p string) error { // not export call from Add() or Update
 	err := bcrypt.CompareHashAndPassword(u.Secret, []byte(p))
-	log.Println("bcrypt...",u.Secret, p)
+	log.Println("bcrypt...", u.Secret, p)
 	if err != nil {
 		return err
 	}
@@ -294,4 +294,3 @@ func SearchUsers(db *sqlx.DB, s string) (Users, error) {
 	log.Println("users = ", users)
 	return users, nil
 }
-

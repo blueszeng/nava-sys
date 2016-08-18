@@ -50,18 +50,18 @@ func SetupRouter(c *c.Env) *mux.Router{
 	// แก้ปัญหา"/" ปิดท้าย URI แล้ว 404 page not found
 	// .StrictSlash(true) help ignore last "/" in URI
 	r := mux.NewRouter().StrictSlash(true)
-	r.HandleFunc("/v1/users", c.NewUser).Methods("POST")
+	r.HandleFunc("/v1/users", c.UserNew).Methods("POST")
 	r.HandleFunc("/v1/persons", c.NewPerson).Methods("POST")
 	// User
 	s := r.PathPrefix("/v1/users").Subrouter()
-	s.HandleFunc("/", c.AllUser).Methods("GET"); log.Println("/v1/users GET AllUser");
+	s.HandleFunc("/", c.UserAll).Methods("GET"); log.Println("/v1/users GET AllUser");
 	//s.HandleFunc("/", c.NewUser).Methods("POST"); log.Println("/v1/users POST New User")
-	s.HandleFunc("/{id:[0-9]+}", c.ShowUser).Methods("GET"); log.Println("/v1/users/:id GET Show User")
-	s.HandleFunc("/{id:[0-9]+}", c.UpdateUser).Methods("POST"); log.Println("/v1/users/:id POST Update User")
-	s.HandleFunc("/search", c.SearchUser).Methods("POST"); log.Println("/v1/users/search POST Search User")
-	s.HandleFunc("/login", c.LoginUser).Methods("POST"); log.Println("/v1/login POST UserLogin")
-	s.HandleFunc("/{id:[0-9]+}", c.DelUser).Methods("DELETE"); log.Println("/v1/users/:id DELETE UserDelete")
-	s.HandleFunc("/{id:[0-9]+}/undel", c.UndelUser).Methods("POST"); log.Println("/v1/users/:id/undel PUT UserUndelete")
+	s.HandleFunc("/{id:[0-9]+}", c.UserShow).Methods("GET"); log.Println("/v1/users/:id GET Show User")
+	s.HandleFunc("/{id:[0-9]+}", c.UserUpdate).Methods("POST"); log.Println("/v1/users/:id POST Update User")
+	s.HandleFunc("/search", c.UserSearch).Methods("POST"); log.Println("/v1/users/search POST Search User")
+	s.HandleFunc("/login", c.UserLogin).Methods("POST"); log.Println("/v1/login POST UserLogin")
+	s.HandleFunc("/{id:[0-9]+}", c.UserDel).Methods("DELETE"); log.Println("/v1/users/:id DELETE UserDelete")
+	s.HandleFunc("/{id:[0-9]+}/undel", c.UserUndel).Methods("POST"); log.Println("/v1/users/:id/undel PUT UserUndelete")
 
 	// Role
 	s = r.PathPrefix("/v1/roles").Subrouter()
@@ -77,6 +77,7 @@ func SetupRouter(c *c.Env) *mux.Router{
 	s.HandleFunc("/", c.AllPerson).Methods("GET"); log.Println("/v1/persons GET AllPerson")
 	//s.HandleFunc("/", c.NewPerson).Methods("POST"); log.Println("/v1/persons POST NewPerson")
 	s.HandleFunc("/{id:[0-9]+}", c.ShowPerson).Methods("GET"); log.Println("/v1/persons/:id GET ShowPerson")
+
 
 	return r
 }

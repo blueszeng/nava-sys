@@ -255,7 +255,7 @@ func (u *User) Menus(db *sqlx.DB) ([]*Menu, error) {
 	LEFT JOIN role ON user_role.role_id = role.id
 	LEFT JOIN role_menu ON role.id = role_menu.role_id
 	LEFT JOIN menu ON role_menu.menu_id = menu.id
-	WHERE user.id = ?
+	WHERE user.id = ? AND role_menu.can_read = true
 	`
 	var menus []*Menu
 	err := db.Select(&menus, s, u.ID)

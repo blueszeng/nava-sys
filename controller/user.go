@@ -251,7 +251,8 @@ func (e Env) UserLogin(w http.ResponseWriter, r *http.Request) {
 		log.Println("User Permission: ", p)
 		rs.Status = api.SUCCESS
 		rs.Data = p
-		rs.Link.Related = "http://api.nava.work:8000/user/dashboard"
+		id := strconv.FormatUint(foundUser.ID, 10)
+		rs.Link.Related = "http://api.nava.work:8000/v1/menus/tree/users/" + id
 		w.WriteHeader(http.StatusOK)
 	}
 	output, _ := json.Marshal(rs)

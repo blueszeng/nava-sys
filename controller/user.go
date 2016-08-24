@@ -241,7 +241,6 @@ func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		rs.Status = api.ERROR
 		rs.Message = err.Error()
-		w.WriteHeader(http.StatusOK)
 	} else {
 		// Make UserPermission for response
 		p, err := foundUser.Permission(e.DB)
@@ -253,8 +252,8 @@ func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 		rs.Data = p
 		id := strconv.FormatUint(foundUser.ID, 10)
 		rs.Link.Related = "http://api.nava.work:8000/v1/menus/tree/users/" + id
-		w.WriteHeader(http.StatusOK)
 	}
+	w.WriteHeader(http.StatusOK)
 	output, _ := json.Marshal(rs)
 	fmt.Fprintf(w, "%s", string(output))
 }

@@ -241,7 +241,7 @@ func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		rs.Status = api.ERROR
 		rs.Message = err.Error()
-		w.WriteHeader(http.StatusUnauthorized)
+		w.WriteHeader(http.StatusOK)
 	} else {
 		// Make UserPermission for response
 		p, err := foundUser.Permission(e.DB)

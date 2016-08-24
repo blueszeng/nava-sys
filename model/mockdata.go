@@ -15,4 +15,3 @@ func MockUser()  []*User{
 	}
 	return users
 }
-

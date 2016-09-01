@@ -54,14 +54,15 @@ type UserPermission struct {
 type MenuPermission struct {
 	//UserID           uint64 `json:"user_id"`
 	ID       uint64 `json:"id"`
-	Text     string `json:"text" db:"text"`
-	ParentID uint64 `json:"parent_id" db:"parent_id"`
-	CanRead    bool `json:"can_read" db:"can_read"`
-	CanWrite   bool `json:"can_write" db:"can_write"`
-	CanDelete  bool `json:"can_delete" db:"can_delete"`
-	CanRun     bool `json:"can_run" db:"can_run"`
-	CanApprove bool `json:"can_approve" db:"can_approve"`
-	CanCancel  bool `json:"can_cancel" db:"can_cancel"`
+	//ID         null.Int `json:"id"`
+	Text       string   `json:"text" db:"text"`
+	ParentID   uint64   `json:"parent_id" db:"parent_id"`
+	CanRead    bool     `json:"can_read" db:"can_read"`
+	CanWrite   bool     `json:"can_write" db:"can_write"`
+	CanDelete  bool     `json:"can_delete" db:"can_delete"`
+	CanRun     bool     `json:"can_run" db:"can_run"`
+	CanApprove bool     `json:"can_approve" db:"can_approve"`
+	CanCancel  bool     `json:"can_cancel" db:"can_cancel"`
 }
 
 func (u *User) Permission(db *sqlx.DB) (UserPermission, error) {
@@ -81,7 +82,7 @@ func (u *User) Permission(db *sqlx.DB) (UserPermission, error) {
 	LEFT JOIN role ON user_role.role_id = role.id
 	LEFT JOIN role_menu ON role.id = role_menu.role_id
 	LEFT JOIN menu ON role_menu.menu_id = menu.id
-	WHERE user.id = ?
+	WHERE user.id = ? AND menu.id <> ISNULL(menu.id)
 	`
 	up := UserPermission{}
 	perms := []*MenuPermission{}

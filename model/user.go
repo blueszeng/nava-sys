@@ -28,7 +28,8 @@ func (u *User) Get(db *sqlx.DB) (User, error) {
 		updated,
 		deleted
 	FROM user
-	WHERE id = ?`
+	WHERE id = ?
+	AND deleted IS NULL`
 	var user User
 	err := db.Get(&user, sql, u.ID)
 	if err != nil {
@@ -52,7 +53,7 @@ func (u *User) All(db *sqlx.DB) ([]*User, error) {
 	}
 
 	var users Users
-	sql := `SELECT id, name, created, updated, deleted FROM user`
+	sql := `SELECT id, name, created, updated, deleted FROM user WHERE deleted IS NULL`
 	rows, err := db.Queryx(sql)
 	if err != nil {
 		log.Println(">>> db.Query Error= ", err)
@@ -111,12 +112,13 @@ func (u *User) New(db *sqlx.DB) (*User, error) {
 
 // UpdateUser by id
 func (u *User) Update(db *sqlx.DB) (*User, error) {
-	log.Println(">>start models.user.Update() method")
+	log.Println(">>start model.user.Update() method")
 
 	existUser := User{}
 	s := `SELECT *
 		FROM user
-		WHERE id = ?`
+		WHERE id = ?
+		AND deleted IS NULL`
 	err := db.Get(&existUser, s, u.ID)
 	if err != nil {
 		log.Println("Error db.QueryRow in user.Update()", err)
@@ -140,7 +142,8 @@ func (u *User) Update(db *sqlx.DB) (*User, error) {
 		s = `UPDATE user SET
 				name= ?,
 				secret= ?
-			WHERE id =?`
+			WHERE id =?
+			AND deleted IS NULL`
 		_, err = db.Exec(s,
 			u.Name,
 			u.Secret,
@@ -189,7 +192,8 @@ func (u *User) FindByName(db *sqlx.DB) (*User, error) {
 	sql := `
 		SELECT *
 		FROM user
-		WHERE name = ?`
+		WHERE name = ?
+		AND deleted IS NULL`
 	var user User
 	err := db.Get(&user, sql, u.Name)
 	if err != nil {
@@ -255,7 +259,10 @@ func (u *User) Menus(db *sqlx.DB) ([]*Menu, error) {
 	LEFT JOIN role ON user_role.role_id = role.id
 	LEFT JOIN role_menu ON role.id = role_menu.role_id
 	LEFT JOIN menu ON role_menu.menu_id = menu.id
-	WHERE user.id = ? AND role_menu.can_read = true
+	LEFT JOIN org ON role.org_id = org.id
+	WHERE user.id = ?
+	AND role_menu.can_read = true
+	AND user.deleted IS NULL
 	`
 	var menus []*Menu
 	err := db.Select(&menus, s, u.ID)
@@ -268,7 +275,10 @@ func (u *User) Menus(db *sqlx.DB) ([]*Menu, error) {
 // function models.User.SearchUsers() here!
 func SearchUsers(db *sqlx.DB, s string) (Users, error) {
 	s = "%" + strings.ToLower(s) + "%"
-	stmt, err := db.Prepare("SELECT id, name FROM user WHERE LOWER(name) LIKE ?")
+	stmt, err := db.Prepare(`
+		SELECT id, name
+		FROM user
+		WHERE LOWER(name) LIKE ? AND deleted IS NULL`)
 	if err != nil {
 		log.Println("Error in SearchUsers() - db.Prepare() >>>", err)
 		return nil, err

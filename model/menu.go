@@ -6,7 +6,7 @@ import (
 )
 
 type Menu struct {
-	ID           uint64  `json:"id"`
+	Base
 	ParentID     uint64  `json:"parent_id" db:"parent_id"`
 	Text         string  `json:"text"`
 	Icon         string  `json:"icon"`
@@ -21,7 +21,7 @@ type Menus []*Menu
 
 func (m *Menu) All(db *sqlx.DB) ([]*Menu, error) {
 	var menus Menus
-	err := db.Select(&menus, `SELECT * FROM menu`)
+	err := db.Select(&menus, `SELECT * FROM menu WHERE deleted IS NULL`)
 	if err != nil {
 		log.Println(">>> 1. db.Query Error= ", err)
 		return nil, err
@@ -30,7 +30,7 @@ func (m *Menu) All(db *sqlx.DB) ([]*Menu, error) {
 	return menus, nil
 }
 
-func (m *Menu) New(db *sqlx.DB) error {
+func (m *Menu) Insert(db *sqlx.DB) error {
 	log.Println("Start m.New()")
 	sql := `INSERT INTO menu (
 		parent_id,
@@ -58,7 +58,7 @@ func (m *Menu) New(db *sqlx.DB) error {
 	}
 	log.Println(rs)
 	menu := new(Menu)
-	sql = `SELECT * FROM menu WHERE id = ?`
+	sql = `SELECT * FROM menu WHERE id = ? AND deleted IS NULL`
 	lastID, _ := rs.LastInsertId()
 	err = db.Get(&menu, sql, lastID)
 	if err != nil {

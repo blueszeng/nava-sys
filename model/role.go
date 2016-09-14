@@ -7,8 +7,9 @@ import (
 
 type Role struct {
 	Base
-	TH string `json:"th"`
-	EN string `json:"en"`
+	NameTh string `json:"name_th" db:"name_th"`
+	NameEn string `json:"name_en" db:"name_en"`
+	OrgId  uint64 `json:"org_id" db:"org_id"`
 }
 
 type UserRole struct {
@@ -33,7 +34,7 @@ func (r *Role) All(db *sqlx.DB) ([]*Role, error) {
 	log.Println("call AllRole")
 
 	var roles []*Role
-	sql := `SELECT * FROM role`
+	sql := `SELECT * FROM role WHERE deleted IS NULL`
 	err := db.Select(&roles, sql)
 	if err != nil {
 		log.Println("Error in model.Role.All", err)
@@ -82,7 +83,9 @@ func (u *User) Permission(db *sqlx.DB) (UserPermission, error) {
 	LEFT JOIN role ON user_role.role_id = role.id
 	LEFT JOIN role_menu ON role.id = role_menu.role_id
 	LEFT JOIN menu ON role_menu.menu_id = menu.id
-	WHERE user.id = ? AND menu.id <> ISNULL(menu.id)
+	WHERE user.id = ?
+	AND menu.id <> ISNULL(menu.id)
+	AND menu.deleted IS NULL
 	`
 	up := UserPermission{}
 	perms := []*MenuPermission{}

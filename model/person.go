@@ -77,7 +77,7 @@ func (p *Person) New(db *sqlx.DB) error {
 func (p *Person) All(db *sqlx.DB) ([]*Person, error) {
 	log.Println("run models.Person.All method from:", p)
 	var persons []*Person
-	sql := `SELECT * FROM person`
+	sql := `SELECT * FROM person WHERE deleted IS NULL`
 	err := db.Select(&persons, sql)
 	if err != nil {
 		log.Println(">>> db.Query Error= ", err)
@@ -89,7 +89,7 @@ func (p *Person) All(db *sqlx.DB) ([]*Person, error) {
 func (p *Person) Show(db *sqlx.DB) (Person, error) {
 	log.Println("run Show method")
 	var person Person
-	sql := `SELECT * FROM person WHERE id = ?`
+	sql := `SELECT * FROM person WHERE id = ? AND deleted IS NULL`
 	//err := db.QueryRowx(sql, p.ID).StructScan(&person)
 	err := db.Get(&person, sql, p.ID)
 	log.Println("p=", p)

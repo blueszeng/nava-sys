@@ -197,7 +197,7 @@ func (u *User) FindByName(db *sqlx.DB) (*User, error) {
 	var user User
 	err := db.Get(&user, sql, u.Name)
 	if err != nil {
-		log.Println(err)
+		log.Println("model.User.FindByName Error in db.Get():", err)
 		return nil, err
 	}
 	return &user, nil
@@ -290,7 +290,6 @@ func SearchUsers(db *sqlx.DB, s string) (Users, error) {
 		return nil, err
 	}
 	defer rows.Close()
-
 	users := Users{}
 	for rows.Next() {
 		u := new(User)
@@ -303,4 +302,9 @@ func SearchUsers(db *sqlx.DB, s string) (Users, error) {
 	}
 	log.Println("users = ", users)
 	return users, nil
+}
+
+func (u *User) GetOrg(db *sqlx.DB) (org *Org, err error) {
+
+	return &org, nil
 }

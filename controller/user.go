@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -189,12 +188,13 @@ func (e Env) LoginUser(c *gin.Context) {
 		rs.Message = err.Error()
 		c.JSON(http.StatusBadRequest, rs)
 	} else {
-		log.Println("Success decode JSON -> :", loginUser, " Result user decoded -> ", loginUser)
+		log.Println("Success decode JSON -> :", loginUser)
 		foundUser, err := loginUser.FindByName(e.DB)
 		if err != nil {
 			rs.Status = api.ERROR
-			rs.Message = err.Error()
+			rs.Message = "Cannot find user or user deleted: " + err.Error()
 			c.JSON(http.StatusUnauthorized, rs)
+			return
 		}
 		// Verify Password
 		err = foundUser.VerifyPass(loginUser.Password)
@@ -202,7 +202,7 @@ func (e Env) LoginUser(c *gin.Context) {
 		if err != nil {
 			log.Println("VerifyPass Fail:", err)
 			rs.Status = api.ERROR
-			rs.Message = err.Error()
+			rs.Message = "Wrong username or password:" + err.Error()
 			c.JSON(http.StatusUnauthorized, rs)
 		} else {
 			// Make UserPermission for response
@@ -221,40 +221,57 @@ func (e Env) LoginUser(c *gin.Context) {
 }
 
 // UserSearch Method output JSON user.id for client use id as parameter in UserUpdate
-func (e Env) SearchUser(w http.ResponseWriter, r *http.Request) {
-	log.Println("call GET UserSearch() Method:", r.Method)
+func (e Env) SearchUser(c *gin.Context) {
+	log.Println("call GET UserSearch()")
+	c.Header("Server", "NAVA SYS")
+	c.Header("Host", "api.nava.work:8000")
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", "*")
 
-	if r.Method != "POST" {
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
-
-	// get search string from r.Body
 	var s api.Search
-	decode := json.NewDecoder(r.Body)
-	err := decode.Decode(&s)
-	log.Println("Search string 'name'=", s.Name)
-	if err != nil {
+	if err := c.BindJSON(&s); err != nil {
 		log.Println("Error decode.Decode(&u) >>", err)
-	}
-	log.Println("Success decode JSON -> :", s)
 
-	users, err := m.SearchUsers(e.DB, s.Name)
-	if err != nil {
-		log.Println("Error in Query:", err)
+	} else {
+		log.Println("Success decode JSON -> :", s)
+		log.Println("Search string 'name'=", s.Name)
+		users, err := m.SearchUsers(e.DB, s.Name)
+		if err != nil {
+			log.Println("Error in Query:", err)
+		}
+		rs := api.Response{}
+		if users == nil {
+			rs.Status = api.ERROR
+			rs.Message = "NOT_FOUND ==>" + err.Error()
+			c.JSON(http.StatusNotFound, rs)
+		} else {
+			rs.Status = api.SUCCESS
+			rs.Data = users
+			c.JSON(http.StatusOK, rs)
+		}
 	}
+}
+
+func (e Env) GetUserOrg(c *gin.Context) {
+	log.Println("call GetUserCompany()")
+	c.Header("Server", "NAVA SYS")
+	c.Header("Host", "api.nava.work:8000")
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", "*")
+
+	id := c.Param("id")
+	u := new(m.User)
+	u.ID, _ = strconv.ParseUint(id, 10, 64)
+	org, err := u.GetOrg(e.DB)
 	rs := api.Response{}
-	if users == nil {
+	if err != nil {
 		rs.Status = api.ERROR
-		rs.Message = "NOT_FOUND ==>" + err.Error()
-		w.WriteHeader(http.StatusNotFound)
+		rs.Message = "No Content: " + err.Error()
+		c.JSON(http.StatusNotFound, rs)
 	} else {
 		rs.Status = api.SUCCESS
-		rs.Data = users
-		w.WriteHeader(http.StatusOK)
+		rs.Data = org
+		rs.Link.Self = "host + version + /users"
+		c.JSON(http.StatusOK, rs)
 	}
-	output, _ := json.Marshal(rs)
-	fmt.Fprintf(w, "%s", string(output))
 }

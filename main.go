@@ -39,9 +39,9 @@ func SetupRouter(e *c.Env) *gin.Engine{
 		userV1.GET("/:id", e.GetUser)
 		userV1.PUT("/:id", e.UpdateUser)
 		userV1.DELETE("/:id", e.DeleteUser)
-		userV1.POST("/id/undel", e.UndeleteUser)
+		userV1.POST("/undelete/:id", e.UndeleteUser)
 		userV1.POST("/login", e.LoginUser)
-		//userV1.POST("/search", e.SearchUser)
+		userV1.POST("/search", e.SearchUser)
 	}
 
 	//personV1 := app.Group("/v1/persons")

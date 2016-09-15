@@ -6,197 +6,157 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-
-	"github.com/gorilla/mux"
 	m "github.com/mrtomyum/nava-sys/model"
 	"github.com/mrtomyum/nava-sys/api"
+	"github.com/gin-gonic/gin"
 )
 
 // Method UserShow to query 1 row of user match u.id
-func (e Env) GetUser(w http.ResponseWriter, r *http.Request) {
+func (e Env) GetUser(c *gin.Context) {
 	log.Println("call GET UserShow()")
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
-	if r.Method != "GET" {
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
-	v := mux.Vars(r)
-	id := v["id"]
+	c.Header("Server", "NAVA SYS")
+	c.Header("Host", "api.nava.work:8000")
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", "*")
+	id := c.Param("id")
 	u := new(m.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
-	log.Println("Print u.ID", id)
-
 	user, err := u.Get(e.DB)
-
 	rs := api.Response{}
 	if err != nil {
 		rs.Status = api.ERROR
 		rs.Message = "No Content: " + err.Error()
-		w.WriteHeader(http.StatusNotFound)
+		c.JSON(http.StatusNotFound, rs)
 	} else {
 		rs.Status = api.SUCCESS
 		rs.Data = user
-		//rs.Link.Self = host + version + "/users"
-		w.WriteHeader(http.StatusOK)
+		rs.Link.Self = "host + version + /users"
+		c.JSON(http.StatusOK, rs)
 	}
-	o, _ := json.Marshal(rs)
-	fmt.Fprintf(w, "%s", string(o))
 }
 
-func (e Env) UpdateUser(w http.ResponseWriter, r *http.Request) {
+func (e Env) UpdateUser(c *gin.Context) {
 	log.Println("call PUT UserUpdate()")
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
-
-	if r.Method != "POST" {
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
-
+	c.Header("Server", "NAVA SYS")
+	c.Header("Host", "api.nava.work:8000")
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", "*")
 	u := new(m.User)
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&u)
-	if err != nil {
-		log.Println("Error decode.Decode(&u) >>", err)
-	}
-	log.Println("1. After decoder Check decoder, u= ", decoder, u)
-	v := mux.Vars(r)
-	userID := v["id"]
-	u.ID, _ = strconv.ParseUint(userID, 10, 64)
-	log.Println("2. Check v, u= ", v, u)
-
-	updateUser, err := u.Update(e.DB)
-	fmt.Println("Result User UPDATE to DB: ", updateUser)
-
 	rs := api.Response{}
-	if err != nil {
-		rs.Status = api.ERROR
-		rs.Message = "Not Modified: " + err.Error()
-		w.WriteHeader(http.StatusNotModified)
+	if err := c.BindJSON(&u); err != nil {
+		log.Println("Error c.BindJSON(&u) >>", err)
 	} else {
-		rs.Status = api.SUCCESS
-		rs.Data = updateUser
-		w.WriteHeader(http.StatusOK)
+		id := c.Param("id")
+		u.ID, err = strconv.ParseUint(id, 10, 64)
+		if err != nil {
+			rs.Status = api.ERROR
+			rs.Message = err.Error()
+		}
+		updatedUser, err := u.Update(e.DB)
+		fmt.Println("Result User UPDATE to DB: ", updatedUser)
+		rs := api.Response{}
+		if err != nil {
+			rs.Status = api.ERROR
+			rs.Message = err.Error()
+			c.JSON(http.StatusNotModified, rs)
+		} else {
+			rs.Status = api.SUCCESS
+			rs.Data = updatedUser
+			c.JSON(http.StatusOK, rs)
+		}
 	}
-	output, _ := json.Marshal(rs)
-	fmt.Fprintf(w, "%s", string(output))
 }
 
-func (e *Env) AllUser(w http.ResponseWriter, r *http.Request) {
+func (e *Env) AllUser(c *gin.Context) {
 	log.Println("call GET All User()")
-	if r.Method != "GET" {
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
-
+	c.Header("Server", "NAVA SYS")
+	c.Header("Host", "api.nava.work:8000")
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", "*")
 	u := m.User{}
 	users, err := u.All(e.DB)
-	rs := api.Response{}
-	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
-		rs.Status = api.ERROR
-		rs.Message = err.Error()
-		w.WriteHeader(http.StatusNotFound)
-	} else {
-		rs.Status = api.SUCCESS
-		rs.Data = users
-		w.WriteHeader(http.StatusOK)
-	}
-	output, err := json.Marshal(rs)
-	if err != nil {
-		log.Println("Error json.Marshal:", err)
-	}
-	fmt.Fprintf(w, "%s", string(output))
-}
-
-func (e *Env) NewUser(w http.ResponseWriter, r *http.Request) {
-	log.Println("call POST UserAdd()")
-	log.Println("Request Body:", r.Body)
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
-
-	if r.Method != "POST" {
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
-
-	u := m.User{}
-	// retrieve JSON from body request to decoder and decode it to memory address of User{}
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&u)
-	if err != nil {
-		log.Println("Error decode.Decode(&u) >>", err)
-	}
-	log.Println("Success decode JSON -> :", u, " Result user decoded -> ", u)
-	// hash password to []byte before assign to u.Password with function SetPass
-	err = u.SetPass()
-	if err != nil {
-		log.Println("Error u.SetPass(): ", err)
-	} else {
-		log.Println("Success u.SetPass()")
-	}
-	// call u.New() method from m/user
-	newUser, err := u.New(e.DB)
 	rs := api.Response{}
 	if err != nil {
 		// reply error message with JSON
 		rs.Status = api.ERROR
 		rs.Message = err.Error()
-		w.WriteHeader(http.StatusNotImplemented)
+		c.JSON(http.StatusNotFound, rs)
 	} else {
 		rs.Status = api.SUCCESS
-		rs.Data = newUser
-		w.WriteHeader(http.StatusOK)
+		rs.Data = users
+		c.JSON(http.StatusOK, rs)
 	}
-	output, _ := json.Marshal(rs)
-	fmt.Fprintf(w, "%s" ,string(output))
 }
 
-// UserDelete Method to mark deleted by field User.DeletedAt.Valid == true
-func (e Env) DeleteUser(w http.ResponseWriter, r *http.Request){
-	log.Println("call GET UserDelete() Method:", r.Method)
-	if r.Method != "DELETE" {
-		http.Error(w, http.StatusText(500), 500)
-		return
+func (e *Env) NewUser(c *gin.Context) {
+	log.Println("call POST UserAdd()")
+	c.Header("Server", "NAVA SYS")
+	c.Header("Host", "api.nava.work:8000")
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", "*")
+	var u m.User
+	rs := api.Response{}
+	// retrieve JSON from body request to decoder and decode it to memory address of User{}
+	if err := c.BindJSON(&u); err != nil {
+		rs.Status = api.ERROR
+		rs.Message = err.Error()
+		c.JSON(http.StatusBadRequest, rs)
+	} else {
+		// hash password to []byte before assign to u.Password with function SetPass
+		err = u.SetPass()
+		if err != nil {
+			log.Println("Error u.SetPass(): ", err)
+		} else {
+			log.Println("Success u.SetPass()")
+		}
+		// call u.New() method from m.user
+		newUser, err := u.New(e.DB)
+		if err != nil {
+			// reply error message with JSON
+			rs.Status = api.ERROR
+			rs.Message = err.Error()
+			c.JSON(http.StatusConflict, rs)
+		} else {
+			rs.Status = api.SUCCESS
+			rs.Data = newUser
+			c.JSON(http.StatusOK, rs)
+		}
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
+	return
+}
+// UserDelete Method to mark deleted by field User.DeletedAt.Valid == true
+func (e Env) DeleteUser(c *gin.Context){
+	log.Println("call GET UserDelete()")
+	c.Header("Server", "NAVA SYS")
+	c.Header("Host", "api.nava.work:8000")
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", "*")
 
-	v := mux.Vars(r)
-	id := v["id"]
+	id := c.Param("id")
 	u := new(m.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
-
 	u, err := u.Del(e.DB)
 	rs := api.Response{}
 	if err != nil {
+		// reply error message with JSON
 		rs.Status = api.ERROR
-		rs.Message = "Not Modified: " + err.Error()
-		w.WriteHeader(http.StatusNotModified)
+		rs.Message = err.Error()
+		c.JSON(http.StatusConflict, rs)
 	} else {
 		rs.Status = api.SUCCESS
 		rs.Data = u
-		w.WriteHeader(http.StatusOK)
+		c.JSON(http.StatusOK, rs)
 	}
-	output, _ := json.Marshal(rs)
-	fmt.Fprintf(w, "%s", string(output))
 }
 //  User Undelete Method
-func (e Env) UndeleteUser(w http.ResponseWriter, r *http.Request) {
-	log.Println("call GET UserUndelete() Method:", r.Method)
-	if r.Method != "POST" +
-		"" {
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
+func (e Env) UndeleteUser(c *gin.Context) {
+	log.Println("call GET UserUndelete()")
+	c.Header("Server", "NAVA SYS")
+	c.Header("Host", "api.nava.work:8000")
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", "*")
 
-	v := mux.Vars(r)
-	id := v["id"]
+	id := c.Param("id")
 	u := new(m.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
 
@@ -205,57 +165,59 @@ func (e Env) UndeleteUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		rs.Status = api.ERROR
 		rs.Message = "Not Modified" + err.Error()
-		w.WriteHeader(http.StatusNotModified)
+		c.JSON(http.StatusNotModified, rs)
 	} else {
 		rs.Status = api.SUCCESS
 		rs.Data = u
-		w.WriteHeader(http.StatusOK)
+		c.JSON(http.StatusOK, rs)
 	}
-	output, _ := json.Marshal(rs)
-	fmt.Fprintf(w, "%s",string(output))
+
 
 }
 // Login Endpoint
-func (e Env) LoginUser(w http.ResponseWriter, r *http.Request) {
+func (e Env) LoginUser(c *gin.Context) {
 	log.Println("call POST Login()")
-	if r.Method != "POST" {
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
-
+	c.Header("Server", "NAVA SYS")
+	c.Header("Host", "api.nava.work:8000")
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", "*")
 	var loginUser m.User
-	decode := json.NewDecoder(r.Body)
-	err := decode.Decode(&loginUser)
-	if err != nil {
-		log.Println("Error decode.Decode(&u) >>", err)
-	}
-	log.Println("Success decode JSON -> :", loginUser, " Result user decoded -> ", loginUser)
-	// Verify Password
-	foundUser, err := loginUser.FindByName(e.DB)
-	err = foundUser.VerifyPass(loginUser.Password)
-	log.Println ("Check Password:", loginUser.Password)
 	rs := api.Response{}
-	if err != nil {
-		log.Println(err)
+	if err := c.BindJSON(&loginUser); err != nil {
+		log.Println("Error c.BindJSON(&loginUser) >>", err)
 		rs.Status = api.ERROR
 		rs.Message = err.Error()
+		c.JSON(http.StatusBadRequest, rs)
 	} else {
-		// Make UserPermission for response
-		p, err := foundUser.Permission(e.DB)
+		log.Println("Success decode JSON -> :", loginUser, " Result user decoded -> ", loginUser)
+		foundUser, err := loginUser.FindByName(e.DB)
 		if err != nil {
-			log.Println("Error from call user.Permission()", err)
+			rs.Status = api.ERROR
+			rs.Message = err.Error()
+			c.JSON(http.StatusUnauthorized, rs)
 		}
-		log.Println("User Permission: ", p)
-		rs.Status = api.SUCCESS
-		rs.Data = p
-		id := strconv.FormatUint(foundUser.ID, 10)
-		rs.Link.Related = "http://api.nava.work:8000/v1/menus/tree/users/" + id
+		// Verify Password
+		err = foundUser.VerifyPass(loginUser.Password)
+		log.Println ("Check Password:", loginUser.Password)
+		if err != nil {
+			log.Println("VerifyPass Fail:", err)
+			rs.Status = api.ERROR
+			rs.Message = err.Error()
+			c.JSON(http.StatusUnauthorized, rs)
+		} else {
+			// Make UserPermission for response
+			p, err := foundUser.Permission(e.DB)
+			if err != nil {
+				log.Println("Error from call user.Permission()", err)
+			}
+			log.Println("User Permission: ", p)
+			rs.Status = api.SUCCESS
+			rs.Data = p
+			id := strconv.FormatUint(foundUser.ID, 10)
+			rs.Link.Related = "http://api.nava.work:8000/v1/menus/tree/users/" + id
+			c.JSON(http.StatusOK, rs)
+		}
 	}
-	w.WriteHeader(http.StatusOK)
-	output, _ := json.Marshal(rs)
-	fmt.Fprintf(w, "%s", string(output))
 }
 
 // UserSearch Method output JSON user.id for client use id as parameter in UserUpdate

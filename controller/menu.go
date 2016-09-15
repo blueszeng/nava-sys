@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (e *Env) AllMenu(w http.ResponseWriter, r *http.Request) {
+func (e *Env) GetAllMenu(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
 
@@ -28,7 +28,7 @@ func (e *Env) AllMenu(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(output))
 }
 
-func (e *Env) NewMenu(w http.ResponseWriter, r *http.Request) {
+func (e *Env) PostNewMenu(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, http.StatusText(500), 500)
 		return
@@ -51,7 +51,7 @@ func (e *Env) NewMenu(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(output))
 }
 
-func (e *Env) AllMenuTree(w http.ResponseWriter, r *http.Request) {
+func (e *Env) GetAllMenuTree(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET"{
 		http.Error(w, http.StatusText(500), 500)
 		return

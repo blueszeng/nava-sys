@@ -47,9 +47,8 @@ func loadConfig() *Config {
 }
 
 func SetupRouter(c *c.Env) *mux.Router{
-	// แก้ปัญหา"/" ปิดท้าย URI แล้ว 404 page not found
-	// .StrictSlash(true) help ignore last "/" in URI
 	r := mux.NewRouter().StrictSlash(true)
+
 	r.HandleFunc("/v1/users", c.NewUser).Methods("POST")
 	r.HandleFunc("/v1/persons", c.NewPerson).Methods("POST")
 	// User

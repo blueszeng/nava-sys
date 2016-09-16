@@ -306,5 +306,5 @@ func SearchUsers(db *sqlx.DB, s string) (Users, error) {
 
 func (u *User) GetOrg(db *sqlx.DB) (org *Org, err error) {
 
-	return &org, nil
+	return org, nil
 }

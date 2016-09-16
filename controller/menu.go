@@ -8,47 +8,54 @@ import (
 	m "github.com/mrtomyum/nava-sys/model"
 	"strconv"
 	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
+	"github.com/mrtomyum/nava-sys/api"
 )
 
-func (e *Env) GetAllMenu(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
-
+func (e *Env) GetAllMenu(c *gin.Context) {
+	log.Println("call GetAllMenu()")
+	c.Header("Server", "NAVA SYS")
+	c.Header("Host", "api.nava.work:8000")
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", "*")
 	m := new(m.Menu)
+	rs := api.Response{}
 	menus, err := m.All(e.DB)
 	if err != nil {
 		log.Println("Error m.All():", err)
-		w.WriteHeader(http.StatusNotFound)
+		rs.Status = api.ERROR
+		rs.Message = err.Error()
+		c.JSON(http.StatusNotFound, rs)
 	}
-	w.WriteHeader(http.StatusOK)
-	output, err := json.Marshal(menus)
-	if err != nil {
-		log.Println("Error json.Marshal:", err)
-	}
-	fmt.Fprintf(w, string(output))
+	rs.Status = api.SUCCESS
+	rs.Data = menus
+	c.JSON(http.StatusOK, rs)
 }
 
-func (e *Env) PostNewMenu(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
+func (e *Env) PostNewMenu(c *gin.Context) {
+	log.Println("call GetAllMenu()")
+	c.Header("Server", "NAVA SYS")
+	c.Header("Host", "api.nava.work:8000")
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", "*")
 	m := m.Menu{}
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&m)
-	if err != nil {
+	rs := api.Response{}
+	if err := c.BindJSON(&m); err != nil{
 		log.Println("Error decode.Decode(&m) >>", err)
+		rs.Status = api.FAIL
+		rs.Message = err.Error()
+	} else {
+		newMenu, err := m.Insert(e.DB)
+		if err != nil {
+			fmt.Println("Error Insert DB:", err)
+			rs.Status = api.ERROR
+			rs.Message = err.Error()
+		} else {
+			rs.Status = api.SUCCESS
+			rs.Data = newMenu
+		}
 	}
-	err = m.Insert(e.DB)
-	if err != nil {
-		fmt.Println("Error Insert DB:", err)
-		w.WriteHeader(http.StatusNotImplemented)
-	}
-	w.WriteHeader(http.StatusOK)
-	output, _ := json.Marshal(&m)
-	fmt.Fprintf(w, string(output))
+	c.JSON(http.StatusOK, rs)
 }
 
 func (e *Env) GetAllMenuTree(w http.ResponseWriter, r *http.Request) {

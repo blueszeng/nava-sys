@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 type ResponseStatus int
@@ -63,4 +65,11 @@ func (rs *ResponseStatus) UnmarshalJSON(data []byte) error {
 	}
 	*rs = statusENUM
 	return nil
+}
+
+func (rs *Response) Success(data interface{} ) {
+	var c gin.Context
+	rs.Status = SUCCESS
+	rs.Data = data
+	c.JSON(http.StatusOK, rs)
 }

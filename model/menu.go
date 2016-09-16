@@ -30,8 +30,8 @@ func (m *Menu) All(db *sqlx.DB) ([]*Menu, error) {
 	return menus, nil
 }
 
-func (m *Menu) Insert(db *sqlx.DB) error {
-	log.Println("Start m.New()")
+func (m *Menu) Insert(db *sqlx.DB) (*Menu, error) {
+	log.Println("Start m.Insert()")
 	sql := `INSERT INTO menu (
 		parent_id,
 		text,
@@ -41,9 +41,9 @@ func (m *Menu) Insert(db *sqlx.DB) error {
 		path,
 		note
 	)
-	VALUES(?,?,?,?,?,?)`
+	VALUES(?,?,?,?,?,?,?)`
 
-	rs, err := db.Exec(sql,
+	res, err := db.Exec(sql,
 		m.ParentID,
 		m.Text,
 		m.Icon,
@@ -54,18 +54,28 @@ func (m *Menu) Insert(db *sqlx.DB) error {
 	)
 	if err != nil {
 		log.Println(">>>Error exec INSERT menu: >>>", err)
-		return err
+		return nil, err
 	}
-	log.Println(rs)
-	menu := new(Menu)
+	log.Println(res)
+	var insertedMenu Menu
 	sql = `SELECT * FROM menu WHERE id = ? AND deleted IS NULL`
-	lastID, _ := rs.LastInsertId()
-	err = db.Get(&menu, sql, lastID)
+	lastID, _ := res.LastInsertId()
+	err = db.Get(&insertedMenu, sql, lastID)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	log.Println("Success insert record:", menu)
-	return nil
+	log.Println("Success insert record:", insertedMenu)
+	return &insertedMenu, nil
+}
+
+func (m *Menu) Get(db *sqlx.DB) (*Menu, error) {
+	log.Println("run model.Menu.Get()")
+	sql := `SELECT * FROM menu WHERE id = ?`
+	err := db.Get(&m, sql, m.ID)
+	if err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (this *Menu) Size() int {

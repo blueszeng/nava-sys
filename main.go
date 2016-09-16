@@ -31,7 +31,8 @@ func loadConfig() *Config {
 
 func SetupRouter(e *c.Env) *gin.Engine{
 	app := gin.New()
-
+	app.Use(gin.Logger())
+	app.Use(gin.Recovery())
 	userV1 := app.Group("/v1/users")
 	{
 		userV1.POST("/", e.NewUser)

@@ -60,23 +60,27 @@ func (e *Env) PostNewMenu(c *gin.Context) {
 	c.JSON(http.StatusOK, rs)
 }
 
-func (e *Env) GetAllMenuTree(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET"{
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*") //to allow cross domain AJAX.
-
+func (e *Env) GetAllMenuTree(c *gin.Context) {
+	log.Println("call GetAllMenuTree()")
+	c.Header("Server", "NAVA SYS")
+	c.Header("Host", "api.nava.work:8000")
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", "*")
 	menu := new(m.Menu)
+	rs := api.Response{}
 	menus, err := menu.All(e.DB)
 	if err != nil {
-		log.Println("Error in m.Menu.All: ", err)
+		fmt.Println("Error Insert DB:", err)
+		rs.Status = api.ERROR
+		rs.Message = err.Error()
+	} else {
+		tree := CreateMenuTree(menus)
+		rs.Status = api.SUCCESS
+		rs.Data = tree.Child
 	}
-	tree := CreateMenuTree(menus)
-	w.WriteHeader(http.StatusOK)
-	output, _ := json.Marshal(tree.Child) // remove root node from tree
-	fmt.Fprintf(w, string(output))
+	rs.Link.Self = "api.nava.work:8000/v1/menus/tree"
+	c.JSON(http.StatusOK, rs)
+
 }
 
 func (e *Env) UserMenuTree(w http.ResponseWriter, r *http.Request) {

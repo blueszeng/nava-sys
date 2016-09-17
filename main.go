@@ -61,7 +61,7 @@ func SetupRouter(e *c.Env) *gin.Engine{
 	{
 		menuV1.GET("/", e.GetAllMenu)
 		menuV1.POST("/", e.PostNewMenu)
-		//menuV1.GET("/tree", e.GetAllMenuTree)
+		menuV1.GET("/tree", e.GetAllMenuTree)
 		//menuV1.GET("/tree/user/:id", e.UserMenuTree)
 	}
 	return app

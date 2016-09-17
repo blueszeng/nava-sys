@@ -52,10 +52,10 @@ func SetupRouter(e *c.Env) *gin.Engine{
 		//personV1.GET("/:id", e.GetPerson)
 	//}
 
-	//roleV1 := app.Group("/v1/roles")
-	//{
-		//roleV1.GET("/", e.AllRole)
-	//}
+	roleV1 := app.Group("/v1/roles")
+	{
+		roleV1.GET("/", e.GetAllRole)
+	}
 
 	menuV1 := app.Group("/v1/menus")
 	{

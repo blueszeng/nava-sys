@@ -12,8 +12,8 @@ type Menu struct {
 	Icon         string  `json:"icon"`
 	SelectedIcon string  `json:"selectedIcon" db:"selected_icon"`
 	Href         string  `json:"href"`
-	Path         string  `json:"path"`
-	Note         string  `json:"note"`
+	Path         string  `json:"-"`
+	Note         string  `json:"-"`
 	Child        []*Menu `json:"nodes,omitempty"`
 }
 

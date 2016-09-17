@@ -251,7 +251,7 @@ func (u *User) Undel(db *sqlx.DB) (*User, error) {
 
 func (u *User) Menus(db *sqlx.DB) ([]*Menu, error) {
 	log.Println("call model.User.Menus")
-	s := `
+	sql := `
 	SELECT
 		menu.*
 	FROM user
@@ -265,7 +265,7 @@ func (u *User) Menus(db *sqlx.DB) ([]*Menu, error) {
 	AND user.deleted IS NULL
 	`
 	var menus []*Menu
-	err := db.Select(&menus, s, u.ID)
+	err := db.Select(&menus, sql, u.ID)
 	if err != nil {
 		log.Fatal("Error in db.Select(): ", err)
 	}

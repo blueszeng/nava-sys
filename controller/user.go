@@ -95,11 +95,13 @@ func (e *Env) NewUser(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	var u m.User
 	rs := api.Response{}
+	rs.Link.Self = "api.nava.work:8000/v1/users"
 	// retrieve JSON from body request to decoder and decode it to memory address of User{}
 	if err := c.BindJSON(&u); err != nil {
-		rs.Status = api.ERROR
+		rs.Status = api.FAIL
 		rs.Message = err.Error()
 		c.JSON(http.StatusBadRequest, rs)
+		return
 	} else {
 		// hash password to []byte before assign to u.Password with function SetPass
 		err = u.SetPass()
@@ -117,11 +119,11 @@ func (e *Env) NewUser(c *gin.Context) {
 			c.JSON(http.StatusConflict, rs)
 		} else {
 			rs.Status = api.SUCCESS
-			rs.Data = newUser
+			rs.Link.Related = "api.nava.work:8000/v1/users/" + string(newUser.ID)
 			c.JSON(http.StatusOK, rs)
 		}
+		return
 	}
-	return
 }
 // UserDelete Method to mark deleted by field User.DeletedAt.Valid == true
 func (e Env) DeleteUser(c *gin.Context){
@@ -130,13 +132,12 @@ func (e Env) DeleteUser(c *gin.Context){
 	c.Header("Host", "api.nava.work:8000")
 	c.Header("Content-Type", "application/json")
 	c.Header("Access-Control-Allow-Origin", "*")
-
+	rs := api.Response{}
 	id := c.Param("id")
+	rs.Link.Self = "api.nava.work:8000/v1/users/" + id
 	u := new(m.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
 	u, err := u.Del(e.DB)
-	rs := api.Response{}
-	rs.Link.Self = "api.nava.work:8000/v1/users"
 	if err != nil {
 		// reply error message with JSON
 		rs.Status = api.ERROR
@@ -148,7 +149,9 @@ func (e Env) DeleteUser(c *gin.Context){
 		c.JSON(http.StatusOK, rs)
 	}
 }
-//  User Undelete Method
+//------------------------
+//  User UnDelete Method
+//------------------------
 func (e Env) UndeleteUser(c *gin.Context) {
 	log.Println("call GET UserUndelete()")
 	c.Header("Server", "NAVA SYS")
@@ -160,8 +163,9 @@ func (e Env) UndeleteUser(c *gin.Context) {
 	u := new(m.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
 
-	u, err := u.Undel(e.DB)
 	rs := api.Response{}
+	rs.Link.Self = "api.nava.work:8000/v1/users/undelete/" + id
+	u, err := u.Undel(e.DB)
 	if err != nil {
 		rs.Status = api.ERROR
 		rs.Message = "Not Modified" + err.Error()
@@ -171,8 +175,6 @@ func (e Env) UndeleteUser(c *gin.Context) {
 		rs.Data = u
 		c.JSON(http.StatusOK, rs)
 	}
-
-
 }
 // Login Endpoint
 func (e Env) LoginUser(c *gin.Context) {

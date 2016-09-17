@@ -8,6 +8,7 @@ import (
 	"log"
 	"strings"
 	"time"
+	"strconv"
 )
 
 type User struct {
@@ -15,6 +16,7 @@ type User struct {
 	Name     string `json:"name"`
 	Password string `json:"password,omitempty"` // just for receive JSON plain-text password but not store in DB
 	Secret   []byte `json:"-"`
+	Self     string
 }
 
 type Users []*User
@@ -42,6 +44,9 @@ func (u *User) Get(db *sqlx.DB) (User, error) {
 		user = User{}
 		return user, errors.New("User Deleted. - ผู้ใช้คนนี้ถูกลบแล้ว")
 	}
+	id := strconv.FormatUint(user.ID, 10)
+	user.Self = "http://api.nava.work:8000/users/" + id
+	//user.Self = URL_HOST + URL_ENDPOINT + string(user.ID)
 	return user, nil
 }
 
@@ -62,15 +67,17 @@ func (u *User) All(db *sqlx.DB) ([]*User, error) {
 	defer rows.Close()
 	for rows.Next() {
 		// We do not save plain text password to DB, just secret.
-		var i = new(User)
-		err := rows.StructScan(&i)
+		var user = new(User)
+		err := rows.StructScan(&user)
 		if err != nil {
 			log.Println(">>> rows.Scan() Error= ", err)
 			return nil, err
 		}
 		// Filter Deleted User
-		if i.Deleted.Valid == false {
-			users = append(users, i)
+		if user.Deleted.Valid == false {
+			id := strconv.FormatUint(user.ID, 10)
+			user.Self = "http://api.nava.work:8000/users/" + id
+			users = append(users, user)
 		}
 	}
 	log.Println("return users", users)

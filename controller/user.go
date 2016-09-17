@@ -46,6 +46,7 @@ func (e Env) UpdateUser(c *gin.Context) {
 		log.Println("Error c.BindJSON(&u) >>", err)
 	} else {
 		id := c.Param("id")
+		rs.Link.Self = "api.nava.work:8000/v1/users/" + id
 		u.ID, err = strconv.ParseUint(id, 10, 64)
 		if err != nil {
 			rs.Status = api.FAIL
@@ -62,7 +63,6 @@ func (e Env) UpdateUser(c *gin.Context) {
 			rs.Data = updatedUser
 		}
 	}
-	rs.Link.Self = "api.nava.work:8000/v1/users"
 	c.JSON(http.StatusOK, rs)
 }
 

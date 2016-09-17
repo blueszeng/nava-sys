@@ -3,12 +3,13 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strings"
 )
 
 type ResponseStatus int
+
 const (
 	SUCCESS ResponseStatus = iota
 	FAIL
@@ -18,8 +19,9 @@ const (
 type Response struct {
 	Status  ResponseStatus `json:"status"`
 	Message string         `json:"message,omitempty"`
-	Data    interface{}    `json:"data,omitempty"`
-	Link    Link `json:"links,omitempty"`
+	//Link    `json:"links"`
+	Link
+	Data    interface{} `json:"data,omitempty"`
 }
 
 type Link struct {
@@ -67,7 +69,7 @@ func (rs *ResponseStatus) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (rs *Response) Success(data interface{} ) {
+func (rs *Response) Success(data interface{}) {
 	var c gin.Context
 	rs.Status = SUCCESS
 	rs.Data = data

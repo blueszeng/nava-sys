@@ -28,6 +28,7 @@ func (e *Env) GetAllMenu(c *gin.Context) {
 		c.JSON(http.StatusNotFound, rs)
 	}
 	rs.Status = api.SUCCESS
+	rs.Link.Self = "api.nava.work:8000/v1/menus"
 	rs.Data = menus
 	c.JSON(http.StatusOK, rs)
 }
@@ -55,6 +56,7 @@ func (e *Env) PostNewMenu(c *gin.Context) {
 			rs.Data = newMenu
 		}
 	}
+	rs.Link.Self = "api.nava.work:8000/v1/menus"
 	c.JSON(http.StatusOK, rs)
 }
 

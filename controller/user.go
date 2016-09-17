@@ -29,7 +29,7 @@ func (e Env) GetUser(c *gin.Context) {
 	} else {
 		rs.Status = api.SUCCESS
 		rs.Data = user
-		rs.Link.Self = "host + version + /users"
+		rs.Link.Self = "api.nava.work:8000/v1/users"
 		c.JSON(http.StatusOK, rs)
 	}
 }
@@ -48,7 +48,7 @@ func (e Env) UpdateUser(c *gin.Context) {
 		id := c.Param("id")
 		u.ID, err = strconv.ParseUint(id, 10, 64)
 		if err != nil {
-			rs.Status = api.ERROR
+			rs.Status = api.FAIL
 			rs.Message = err.Error()
 		}
 		updatedUser, err := u.Update(e.DB)
@@ -57,13 +57,13 @@ func (e Env) UpdateUser(c *gin.Context) {
 		if err != nil {
 			rs.Status = api.ERROR
 			rs.Message = err.Error()
-			c.JSON(http.StatusNotModified, rs)
 		} else {
 			rs.Status = api.SUCCESS
 			rs.Data = updatedUser
-			c.JSON(http.StatusOK, rs)
 		}
 	}
+	rs.Link.Self = "api.nava.work:8000/v1/users"
+	c.JSON(http.StatusOK, rs)
 }
 
 func (e *Env) AllUser(c *gin.Context) {
@@ -79,12 +79,12 @@ func (e *Env) AllUser(c *gin.Context) {
 		// reply error message with JSON
 		rs.Status = api.ERROR
 		rs.Message = err.Error()
-		c.JSON(http.StatusNotFound, rs)
 	} else {
 		rs.Status = api.SUCCESS
 		rs.Data = users
-		c.JSON(http.StatusOK, rs)
 	}
+	rs.Link.Self = "api.nava.work:8000/v1/users"
+	c.JSON(http.StatusOK, rs)
 }
 
 func (e *Env) NewUser(c *gin.Context) {
@@ -136,6 +136,7 @@ func (e Env) DeleteUser(c *gin.Context){
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
 	u, err := u.Del(e.DB)
 	rs := api.Response{}
+	rs.Link.Self = "api.nava.work:8000/v1/users"
 	if err != nil {
 		// reply error message with JSON
 		rs.Status = api.ERROR
@@ -182,9 +183,10 @@ func (e Env) LoginUser(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	var loginUser m.User
 	rs := api.Response{}
+	rs.Link.Self = "api.nava.work:8000/v1/users/login"
 	if err := c.BindJSON(&loginUser); err != nil {
 		log.Println("Error c.BindJSON(&loginUser) >>", err)
-		rs.Status = api.ERROR
+		rs.Status = api.FAIL
 		rs.Message = err.Error()
 		c.JSON(http.StatusBadRequest, rs)
 	} else {
@@ -240,6 +242,7 @@ func (e Env) SearchUser(c *gin.Context) {
 			log.Println("Error in Query:", err)
 		}
 		rs := api.Response{}
+		rs.Link.Self = "api.nava.work:8000/v1/users/search"
 		if users == nil {
 			rs.Status = api.ERROR
 			rs.Message = "NOT_FOUND ==>" + err.Error()

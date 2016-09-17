@@ -16,7 +16,7 @@ type User struct {
 	Name     string `json:"name"`
 	Password string `json:"password,omitempty"` // just for receive JSON plain-text password but not store in DB
 	Secret   []byte `json:"-"`
-	Self     string
+	Self     string `json:"self,omitempty"`
 }
 
 type Users []*User

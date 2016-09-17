@@ -47,28 +47,29 @@ func (r *Role) All(db *sqlx.DB) ([]*Role, error) {
 // User Permission struct
 // -----------------------
 type UserPermission struct {
-	UserID   uint64 `json:"user_id"`
-	UserName string `json:"user_name"`
-	//UserSecret       string `json:"user_secret"`
+	UserID     uint64 `json:"user_id"`
+	UserName   string `json:"user_name"`
 	Permission []*MenuPermission
 }
 type MenuPermission struct {
-	//UserID           uint64 `json:"user_id"`
-	ID       uint64 `json:"id"`
-	//ID         null.Int `json:"id"`
-	Text       string   `json:"text" db:"text"`
-	ParentID   uint64   `json:"parent_id" db:"parent_id"`
-	CanRead    bool     `json:"can_read" db:"can_read"`
-	CanWrite   bool     `json:"can_write" db:"can_write"`
-	CanDelete  bool     `json:"can_delete" db:"can_delete"`
-	CanRun     bool     `json:"can_run" db:"can_run"`
-	CanApprove bool     `json:"can_approve" db:"can_approve"`
-	CanCancel  bool     `json:"can_cancel" db:"can_cancel"`
+	OrgId      uint64 `json:"org_id" db:"org_id"`
+	OrgNameTh  string `json:"org_name_th" db:"org_name_th"`
+	ID         uint64 `json:"id"`
+	Text       string `json:"text" db:"text"`
+	ParentID   uint64 `json:"parent_id" db:"parent_id"`
+	CanRead    bool   `json:"can_read" db:"can_read"`
+	CanWrite   bool   `json:"can_write" db:"can_write"`
+	CanDelete  bool   `json:"can_delete" db:"can_delete"`
+	CanRun     bool   `json:"can_run" db:"can_run"`
+	CanApprove bool   `json:"can_approve" db:"can_approve"`
+	CanCancel  bool   `json:"can_cancel" db:"can_cancel"`
 }
 
 func (u *User) Permission(db *sqlx.DB) (UserPermission, error) {
 	sql := `
 	SELECT
+		org.id as org_id,
+		org.name_th as org_name_th,
 		menu.id,
 		menu.text,
 		menu.parent_id,
@@ -83,6 +84,7 @@ func (u *User) Permission(db *sqlx.DB) (UserPermission, error) {
 	LEFT JOIN role ON user_role.role_id = role.id
 	LEFT JOIN role_menu ON role.id = role_menu.role_id
 	LEFT JOIN menu ON role_menu.menu_id = menu.id
+	LEFT JOIN org ON role.org_id = org.id
 	WHERE user.id = ?
 	AND menu.id <> ISNULL(menu.id)
 	AND menu.deleted IS NULL

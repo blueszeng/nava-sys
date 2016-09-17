@@ -4,10 +4,8 @@ import (
 	"net/http"
 	"fmt"
 	"log"
-	"encoding/json"
 	m "github.com/mrtomyum/nava-sys/model"
 	"strconv"
-	"github.com/gorilla/mux"
 	"github.com/gin-gonic/gin"
 	"github.com/mrtomyum/nava-sys/api"
 )
@@ -83,32 +81,36 @@ func (e *Env) GetAllMenuTree(c *gin.Context) {
 
 }
 
-func (e *Env) UserMenuTree(w http.ResponseWriter, r *http.Request) {
+func (e *Env) UserMenuTree(c *gin.Context) {
 	log.Println("UserMenuTree()...")
-	//if r.Method != "GET"{
-	//	http.Error(w, http.StatusText(500), 500)
-	//	return
-	//}
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	c.Header("Server", "NAVA SYS")
+	c.Header("Host", "api.nava.work:8000")
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", "*")
 
-	v := mux.Vars(r)
-	id := v["id"]
 	u := new(m.User)
-	u.ID, _ = strconv.ParseUint(id, 10, 64)
-
+	rs := api.Response{}
+	id := c.Param("id")
+	var err error
+	u.ID, err = strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		rs.Status = api.FAIL
+		rs.Message = err.Error()
+	}
 	menus, err := u.Menus(e.DB)
 	if err != nil {
-		log.Fatal("Error call u.FindMenuByUser()", err)
-		w.WriteHeader(http.StatusNotFound)
+		fmt.Println("Error Insert DB:", err)
+		rs.Status = api.ERROR
+		rs.Message = err.Error()
+	} else {
+		tree := CreateMenuTree(menus)
+		rs.Status = api.SUCCESS
+		rs.Data = tree.Child
+		log.Println(menus)
+		log.Println(tree.Child)
 	}
-
-	log.Println(menus)
-	tree := CreateMenuTree(menus)
-	log.Println(tree)
-	w.WriteHeader(http.StatusOK)
-	output, _ := json.Marshal(tree.Child)
-	fmt.Fprintf(w, string(output))
+	rs.Link.Self = "api.nava.work:8000/v1/menus/tree/users"
+	c.JSON(http.StatusOK, rs)
 }
 
 func CreateMenuTree(menus []*m.Menu) *m.Menu {

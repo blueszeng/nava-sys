@@ -22,12 +22,6 @@ type Job struct {
 	ParentID uint64
 }
 
-type Org struct {
-	Base
-	Name     string
-	ParentID uint64
-}
-
 func (p *Person) New(db *sqlx.DB) error {
 	log.Println("run models.Person.New method from:", p)
 

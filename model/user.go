@@ -85,7 +85,7 @@ func (u *User) All(db *sqlx.DB) ([]*User, error) {
 }
 
 // Insert New User
-func (u *User) New(db *sqlx.DB) (*User, error) {
+func (u *User) Insert(db *sqlx.DB) (*User, error) {
 	log.Println(">>start User.New() method")
 	log.Println("Test User receiver:", u.Name)
 	rsp, err := db.Exec(
@@ -211,25 +211,17 @@ func (u *User) FindByName(db *sqlx.DB) (*User, error) {
 }
 
 // Method models.User.Del to delete User (Later we will implement my framework just add delete DateX
-func (u *User) Del(db *sqlx.DB) (*User, error) {
+func (u *User) Delete(db *sqlx.DB) error {
 	now := time.Now()
 	now.Format(time.RFC3339)
 	sql := "UPDATE user SET deleted = ? WHERE id = ?"
 	_, err := db.Exec(sql, now, u.ID)
 	if err != nil {
 		log.Println(err)
-		return nil, err
+		return err
 	}
-
-	var user User
-	sql = `SELECT * FROM user WHERE id =?`
-	err = db.Get(&user, sql, u.ID)
-	if err != nil {
-		log.Println("Error when SELECT updated row??? >>>", err)
-		return nil, err
-	}
-	user.Secret = nil
-	return &user, nil
+	log.Printf("User %v deleted", u.ID)
+	return nil
 }
 
 func (u *User) Undel(db *sqlx.DB) (*User, error) {

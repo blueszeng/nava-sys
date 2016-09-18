@@ -137,7 +137,7 @@ func (e Env) DeleteUser(c *gin.Context){
 	rs.Link.Self = "api.nava.work:8000/v1/users/" + id
 	u := new(m.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
-	u, err := u.Del(e.DB)
+	u, err := u.Delete(e.DB)
 	if err != nil {
 		// reply error message with JSON
 		rs.Status = api.ERROR

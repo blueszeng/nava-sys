@@ -6,9 +6,9 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func NewDB(dsn string) (*sqlx.DB, error){
+func NewDB(dsn string) (*sqlx.DB){
 	db := sqlx.MustConnect("mysql", dsn)
 	log.Println("db = ", db)
-	return db, nil
+	return db
 }
 

@@ -208,6 +208,7 @@ func (e Env) LoginUser(c *gin.Context) {
 			rs.Status = api.ERROR
 			rs.Message = "Wrong username or password:" + err.Error()
 			c.JSON(http.StatusUnauthorized, rs)
+			c.AbortWithStatus(401)
 		} else {
 			// Make UserPermission for response
 			p, err := foundUser.Permission(e.DB)

@@ -4,30 +4,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	c "github.com/mrtomyum/nava-sys/controller"
 	m "github.com/mrtomyum/nava-sys/model"
-	"log"
-	"os"
-	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"github.com/mrtomyum/nava-sys/config"
 )
-
-//TODO: เมื่อรันจริงต้องเปลี่ยนเป็น Docker Network Bridge IP เช่น 172.17.0.3 เป็นต้น
-type Config struct {
-	DBHost string `json:"db_host"`
-	DBName string `json:"db_name"`
-	DBUser string `json:"db_user"`
-	DBPass string `json:"db_pass"`
-}
-
-func loadConfig() *Config {
-	file, _ := os.Open("config.json")
-	decoder := json.NewDecoder(file)
-	config := new(Config)
-	err := decoder.Decode(&config)
-	if err != nil {
-		log.Println("error:", err)
-	}
-	return config
-}
 
 func SetupRouter(e *c.Env) *gin.Engine{
 	app := gin.New()
@@ -69,13 +48,9 @@ func SetupRouter(e *c.Env) *gin.Engine{
 
 func main() {
 	// Read configuration file from "config.json"
-	config := loadConfig()
-	var dsn = config.DBUser + ":" + config.DBPass + "@" + config.DBHost + "/" + config.DBName + "?parseTime=true"
+	dsn := config.LoadDSN("config.json")
 	// Create new DB connection pool
-	db, err := m.NewDB(dsn)
-	if err != nil {
-		log.Panic("NewDB() Error:", err)
-	}
+	db := m.NewDB(dsn)
 	defer db.Close()
 	e := &c.Env{DB: db}
 	app := SetupRouter(e)

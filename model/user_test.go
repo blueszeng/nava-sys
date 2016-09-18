@@ -6,16 +6,18 @@ import (
 	"github.com/mrtomyum/nava-sys/config"
 )
 
-var db *sqlx.DB
+var (
+	db *sqlx.DB
+	u User
+)
 
 func init() {
-	dsn := config.LoadDSN("config.json")
+	dsn := config.LoadDSN("../config.json")
 	db = NewDB(dsn)
-	defer db.Close()
 }
 
-func TestUser_Get(t *testing.T) {
-	var u User
+func TestUser_GetById(t *testing.T) {
+	u.ID = 1
 	user, err := u.Get(db)
 	if err != nil {
 		t.Error(err.Error())
@@ -24,5 +26,9 @@ func TestUser_Get(t *testing.T) {
 }
 
 func TestUser_All(t *testing.T) {
-
+	users, err := u.All(db)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	t.Log(users)
 }

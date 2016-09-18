@@ -35,7 +35,7 @@ func (u *User) Get(db *sqlx.DB) (User, error) {
 	var user User
 	err := db.Get(&user, sql, u.ID)
 	if err != nil {
-		log.Println("Error SELECT() in User.Show:", err)
+		log.Println("Error SELECT() in User.Get():", err)
 		return user, err
 	}
 	// Filter only NOT Deleted User

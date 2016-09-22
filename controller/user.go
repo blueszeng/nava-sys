@@ -178,7 +178,7 @@ func (e *Env) UndeleteUser(c *gin.Context) {
 	}
 }
 // Login Endpoint
-func (e *Env) LoginUser(c *gin.Context) {
+func (e *Env) Login(c *gin.Context) {
 	log.Println("call POST Login()")
 	c.Header("Server", "NAVA SYS")
 	c.Header("Host", "api.nava.work:8000")

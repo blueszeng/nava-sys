@@ -13,7 +13,14 @@ func SetupRouter(e *c.Env) *gin.Engine{
 	app.Use(gin.Logger())
 	app.Use(gin.Recovery())
 
-	userV1 := app.Group("/v1/users")
+	app.POST("/login", e.Login)
+	// Try to use this "username" as default page/api after login.
+	//userNameV1 := app.Group("/v1/:username")
+	//{
+	//	userNameV1.GET("/", e.GetUser)
+	//	userNameV1.GET("/menu", e.UserMenuTree)
+	//}
+	userV1 := app.Group("/v1/user")
 	{
 		userV1.POST("/", e.NewUser)
 		userV1.GET("/", e.AllUser)
@@ -21,9 +28,13 @@ func SetupRouter(e *c.Env) *gin.Engine{
 		userV1.PUT("/:id", e.UpdateUser)
 		userV1.DELETE("/:id", e.DeleteUser)
 		userV1.POST("/undelete/:id", e.UndeleteUser)
-		userV1.POST("/login", e.LoginUser)
 		userV1.POST("/search", e.SearchUser)
 		userV1.GET("/:id/orgs", e.GetUserOrg)
+	}
+
+	usersV1 := app.Group("/v1/users")
+	{
+		usersV1.GET("/", e.AllUser)
 	}
 
 	//personV1 := app.Group("/v1/persons")
@@ -52,6 +63,7 @@ func SetupRouter(e *c.Env) *gin.Engine{
 	orgV1 := app.Group("/v1/orgs")
 	{
 		orgV1.GET("/", e.GetAllOrg)
+		orgV1.GET("/roles", e.GetOrgWithRole)
 	}
 	return app
 }

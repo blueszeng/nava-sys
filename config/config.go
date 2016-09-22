@@ -1,9 +1,15 @@
 package config
 
 import (
-	"log"
 	"encoding/json"
+	"log"
 	"os"
+)
+
+const (
+	API_HOST string   = "http://api.nava.work:8000"
+	ORG_NOPADOL int = 1
+	ORG_NAVA   int  = 2
 )
 
 //TODO: เมื่อรันจริงต้องเปลี่ยนเป็น Docker Network Bridge IP เช่น 172.17.0.3 เป็นต้น
@@ -13,6 +19,7 @@ type Config struct {
 	DBUser string `json:"db_user"`
 	DBPass string `json:"db_pass"`
 }
+
 func LoadDSN(fileName string) string {
 	file, err := os.Open(fileName)
 	if err != nil {
@@ -27,6 +34,6 @@ func LoadDSN(fileName string) string {
 	//log.Printf("Test Variable: %s", c.DBHost)
 	dsn := c.DBUser + ":" + c.DBPass + "@" + c.DBHost + "/" + c.DBName + "?parseTime=true"
 	//dsn := "root:mypass@tcp(nava.work:3306)/sys?parseTime=true"
-	log.Println("DSN =",dsn)
+	log.Println("DSN =", dsn)
 	return dsn
 }

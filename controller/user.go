@@ -8,10 +8,11 @@ import (
 	m "github.com/mrtomyum/nava-sys/model"
 	"github.com/mrtomyum/nava-sys/api"
 	"github.com/gin-gonic/gin"
+	"github.com/mrtomyum/nava-sys/config"
 )
 
 // Method UserShow to query 1 row of user match u.id
-func (e Env) GetUser(c *gin.Context) {
+func (e *Env) GetUser(c *gin.Context) {
 	log.Println("call GET UserShow()")
 	c.Header("Server", "NAVA SYS")
 	c.Header("Host", "api.nava.work:8000")
@@ -29,12 +30,12 @@ func (e Env) GetUser(c *gin.Context) {
 	} else {
 		rs.Status = api.SUCCESS
 		rs.Data = user
-		rs.Link.Self = "api.nava.work:8000/v1/users"
+		rs.Link.Self = config.API_HOST + "/v1/users/"
 		c.JSON(http.StatusOK, rs)
 	}
 }
 
-func (e Env) UpdateUser(c *gin.Context) {
+func (e *Env) UpdateUser(c *gin.Context) {
 	log.Println("call PUT UserUpdate()")
 	c.Header("Server", "NAVA SYS")
 	c.Header("Host", "api.nava.work:8000")
@@ -46,7 +47,7 @@ func (e Env) UpdateUser(c *gin.Context) {
 		log.Println("Error c.BindJSON(&u) >>", err)
 	} else {
 		id := c.Param("id")
-		rs.Link.Self = "api.nava.work:8000/v1/users/" + id
+		rs.Link.Self = config.API_HOST + "/v1/users/" + id
 		u.ID, err = strconv.ParseUint(id, 10, 64)
 		if err != nil {
 			rs.Status = api.FAIL
@@ -83,7 +84,7 @@ func (e *Env) AllUser(c *gin.Context) {
 		rs.Status = api.SUCCESS
 		rs.Data = users
 	}
-	rs.Link.Self = "api.nava.work:8000/v1/users"
+	rs.Link.Self = config.API_HOST + "/v1/users"
 	c.JSON(http.StatusOK, rs)
 }
 
@@ -111,7 +112,7 @@ func (e *Env) NewUser(c *gin.Context) {
 			log.Println("Success u.SetPass()")
 		}
 		// call u.New() method from m.user
-		newUser, err := u.New(e.DB)
+		newUser, err := u.Insert(e.DB)
 		if err != nil {
 			// reply error message with JSON
 			rs.Status = api.ERROR
@@ -119,14 +120,14 @@ func (e *Env) NewUser(c *gin.Context) {
 			c.JSON(http.StatusConflict, rs)
 		} else {
 			rs.Status = api.SUCCESS
-			rs.Link.Related = "api.nava.work:8000/v1/users/" + string(newUser.ID)
+			rs.Link.Related = config.API_HOST + "/v1/users/"+ string(newUser.ID)
 			c.JSON(http.StatusOK, rs)
 		}
 		return
 	}
 }
 // UserDelete Method to mark deleted by field User.DeletedAt.Valid == true
-func (e Env) DeleteUser(c *gin.Context){
+func (e *Env) DeleteUser(c *gin.Context){
 	log.Println("call GET UserDelete()")
 	c.Header("Server", "NAVA SYS")
 	c.Header("Host", "api.nava.work:8000")
@@ -137,7 +138,7 @@ func (e Env) DeleteUser(c *gin.Context){
 	rs.Link.Self = "api.nava.work:8000/v1/users/" + id
 	u := new(m.User)
 	u.ID, _ = strconv.ParseUint(id, 10, 64)
-	u, err := u.Delete(e.DB)
+	err := u.Delete(e.DB)
 	if err != nil {
 		// reply error message with JSON
 		rs.Status = api.ERROR
@@ -152,7 +153,7 @@ func (e Env) DeleteUser(c *gin.Context){
 //------------------------
 //  User UnDelete Method
 //------------------------
-func (e Env) UndeleteUser(c *gin.Context) {
+func (e *Env) UndeleteUser(c *gin.Context) {
 	log.Println("call GET UserUndelete()")
 	c.Header("Server", "NAVA SYS")
 	c.Header("Host", "api.nava.work:8000")
@@ -177,7 +178,7 @@ func (e Env) UndeleteUser(c *gin.Context) {
 	}
 }
 // Login Endpoint
-func (e Env) LoginUser(c *gin.Context) {
+func (e *Env) LoginUser(c *gin.Context) {
 	log.Println("call POST Login()")
 	c.Header("Server", "NAVA SYS")
 	c.Header("Host", "api.nava.work:8000")
@@ -226,7 +227,7 @@ func (e Env) LoginUser(c *gin.Context) {
 }
 
 // UserSearch Method output JSON user.id for client use id as parameter in UserUpdate
-func (e Env) SearchUser(c *gin.Context) {
+func (e *Env) SearchUser(c *gin.Context) {
 	log.Println("call GET UserSearch()")
 	c.Header("Server", "NAVA SYS")
 	c.Header("Host", "api.nava.work:8000")
@@ -258,8 +259,8 @@ func (e Env) SearchUser(c *gin.Context) {
 	}
 }
 
-func (e Env) GetUserOrg(c *gin.Context) {
-	log.Println("call GetUserCompany()")
+func (e *Env) GetUserOrg(c *gin.Context) {
+	log.Println("call GetUserOg()")
 	c.Header("Server", "NAVA SYS")
 	c.Header("Host", "api.nava.work:8000")
 	c.Header("Content-Type", "application/json")
@@ -277,7 +278,7 @@ func (e Env) GetUserOrg(c *gin.Context) {
 	} else {
 		rs.Status = api.SUCCESS
 		rs.Data = org
-		rs.Link.Self = "host + version + /users"
+		rs.Link.Self = config.API_HOST + "/v1/users/org"
 		c.JSON(http.StatusOK, rs)
 	}
 }

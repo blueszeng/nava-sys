@@ -303,7 +303,18 @@ func SearchUsers(db *sqlx.DB, s string) (Users, error) {
 	return users, nil
 }
 
-func (u *User) GetOrg(db *sqlx.DB) (org *Org, err error) {
-
-	return org, nil
+func (u *User) GetOrg(db *sqlx.DB) ([]Org, error) {
+	sql := `SELECT org.id, org.name_th, org.name_en
+		FROM user
+		LEFT JOIN user_role ON user.id = user_role.user_id
+		LEFT JOIN role ON user_role.role_id = role.id
+		LEFT JOIN org ON role.org_id = org.id
+		WHERE user.id = ?
+	`
+	var orgs []Org
+	err := db.Select(&orgs, sql, u.ID)
+	if err != nil {
+		return nil, err
+	}
+	return orgs, nil
 }

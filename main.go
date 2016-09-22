@@ -12,6 +12,7 @@ func SetupRouter(e *c.Env) *gin.Engine{
 	app := gin.New()
 	app.Use(gin.Logger())
 	app.Use(gin.Recovery())
+
 	userV1 := app.Group("/v1/users")
 	{
 		userV1.POST("/", e.NewUser)
@@ -22,6 +23,7 @@ func SetupRouter(e *c.Env) *gin.Engine{
 		userV1.POST("/undelete/:id", e.UndeleteUser)
 		userV1.POST("/login", e.LoginUser)
 		userV1.POST("/search", e.SearchUser)
+		userV1.GET("/:id/orgs", e.GetUserOrg)
 	}
 
 	//personV1 := app.Group("/v1/persons")
@@ -34,6 +36,8 @@ func SetupRouter(e *c.Env) *gin.Engine{
 	roleV1 := app.Group("/v1/roles")
 	{
 		roleV1.GET("/", e.GetAllRole)
+		roleV1.POST("/", c.NotImplemented)
+		roleV1.DELETE("/:id", c.NotImplemented)
 	}
 
 	menuV1 := app.Group("/v1/menus")
@@ -42,6 +46,12 @@ func SetupRouter(e *c.Env) *gin.Engine{
 		menuV1.POST("/", e.PostNewMenu)
 		menuV1.GET("/tree", e.GetAllMenuTree)
 		menuV1.GET("/tree/users/:id", e.UserMenuTree)
+		menuV1.DELETE("/:id", c.NotImplemented)
+	}
+
+	orgV1 := app.Group("/v1/orgs")
+	{
+		orgV1.GET("/", e.GetAllOrg)
 	}
 	return app
 }
